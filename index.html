@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Plane Game</title>
+
+<style>
+
+body{
+margin:0;
+background:skyblue;
+overflow:hidden;
+}
+
+canvas{
+display:block;
+margin:auto;
+background:white;
+border:2px solid black;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<canvas id="game" width="400" height="600"></canvas>
+
+<script>
+
+const canvas = document.getElementById("game")
+const ctx = canvas.getContext("2d")
+
+let plane = {
+x:80,
+y:300,
+width:40,
+height:40,
+velocity:0
+}
+
+let gravity = 0.4
+let jump = -8
+
+let towerX = 400
+let gapY = 200
+let gapSize = 180
+
+let speed = 1.5
+
+let score = 0
+let passed = false
+let gameOver = false
+
+document.addEventListener("keydown", function(e){
+
+if(e.code === "Space"){
+
+if(gameOver){
+resetGame()
+gameOver = false
+}else{
+plane.velocity = jump
+}
+
+}
+
+})
+
+function resetGame(){
+
+plane.y = 300
+plane.velocity = 0
+
+towerX = 400
+gapY = Math.random() * 300
+
+score = 0
+passed = false
+
+}
+
+function checkCollision(){
+
+if(
+plane.x < towerX + 60 &&
+plane.x + plane.width > towerX &&
+(
+plane.y < gapY ||
+plane.y + plane.height > gapY + gapSize
+)
+){
+gameOver = true
+}
+
+}
+
+function update(){
+
+if(gameOver) return
+
+plane.velocity += gravity
+plane.y += plane.velocity
+
+if(plane.y < 0){
+plane.y = 0
+plane.velocity = 0
+}
+
+if(plane.y > canvas.height - plane.height){
+gameOver = true
+}
+
+towerX -= speed
+
+if(towerX < -60){
+towerX = 400
+gapY = Math.random() * 300
+passed = false
+}
+
+if(towerX + 60 < plane.x && !passed){
+score++
+passed = true
+}
+
+checkCollision()
+
+}
+
+function draw(){
+
+ctx.clearRect(0,0,400,600)
+
+// jogador
+ctx.fillStyle = "red"
+ctx.fillRect(plane.x, plane.y, plane.width, plane.height)
+
+// torres
+ctx.fillStyle = "gray"
+
+ctx.fillRect(towerX,0,60,gapY)
+
+ctx.fillRect(
+towerX,
+gapY + gapSize,
+60,
+600
+)
+
+// score
+ctx.fillStyle = "black"
+ctx.font = "24px Arial"
+ctx.fillText("Score: " + score, 10, 30)
+
+// tela de derrota
+if(gameOver){
+
+ctx.fillStyle = "black"
+ctx.font = "40px Arial"
+ctx.fillText("allahu akbar!", 120, 300)
+
+ctx.font = "20px Arial"
+ctx.fillText("Press SPACE to restart", 90, 340)
+
+}
+
+}
+
+function loop(){
+
+update()
+draw()
+
+requestAnimationFrame(loop)
+
+}
+
+loop()
+
+</script>
+
+</body>
+</html>
