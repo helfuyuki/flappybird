@@ -1,26 +1,24 @@
+```html
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Plane Game</title>
+<title>Jogo da Cidade</title>
 
 <style>
 
 body{
 margin:0;
-background:skyblue;
 overflow:hidden;
+background:black;
 }
 
 canvas{
 display:block;
 margin:auto;
-background:white;
-border:2px solid black;
 }
 
 </style>
-
 </head>
 
 <body>
@@ -32,60 +30,162 @@ border:2px solid black;
 const canvas = document.getElementById("game")
 const ctx = canvas.getContext("2d")
 
-let plane = {
+// carregar cenário
+const bg = new Image()
+bg.src = "cenario.png"
+
+let bgX = 0
+
+// jogador
+let player = {
 x:80,
 y:300,
-width:40,
-height:40,
-velocity:0
+size:30,
+vel:0
 }
 
-let gravity = 0.4
+let gravity = 0.5
 let jump = -8
 
-let towerX = 400
-let gapY = 200
-let gapSize = 180
+// obstáculos
+let pipes = []
+let pipeWidth = 80
+let gap = 170
+let speed = 2
 
-let speed = 1.5
-
+// pontuação
 let score = 0
-let passed = false
-let gameOver = false
 
-document.addEventListener("keydown", function(e){
+function createPipe(){
 
-if(e.code === "Space"){
+let topHeight = Math.random() * 250 + 50
 
-if(gameOver){
-resetGame()
-gameOver = false
-}else{
-plane.velocity = jump
+pipes.push({
+x:canvas.width,
+top:topHeight,
+bottom:topHeight + gap,
+passed:false
+})
+
 }
 
+setInterval(createPipe,2000)
+
+// controles
+document.addEventListener("keydown",e=>{
+if(e.code === "Space"){
+player.vel = jump
+}
+})
+
+canvas.addEventListener("click",()=>{
+player.vel = jump
+})
+
+// atualizar jogo
+function update(){
+
+player.vel += gravity
+player.y += player.vel
+
+if(player.y < 0) player.y = 0
+if(player.y + player.size > canvas.height) restart()
+
+pipes.forEach(pipe=>{
+
+pipe.x -= speed
+
+// pontuação
+if(!pipe.passed && pipe.x + pipeWidth < player.x){
+pipe.passed = true
+score++
+}
+
+// colisão
+if(
+player.x < pipe.x + pipeWidth &&
+player.x + player.size > pipe.x &&
+(
+player.y < pipe.top ||
+player.y + player.size > pipe.bottom
+)
+){
+restart()
 }
 
 })
 
-function resetGame(){
+pipes = pipes.filter(p=>p.x + pipeWidth > 0)
 
-plane.y = 300
-plane.velocity = 0
-
-towerX = 400
-gapY = Math.random() * 300
-
-score = 0
-passed = false
+// mover cenário
+bgX -= 0.5
+if(bgX <= -canvas.width){
+bgX = 0
+}
 
 }
 
-function checkCollision(){
+// desenhar
+function draw(){
 
-if(
-plane.x < towerX + 60 &&
-plane.x + plane.width > towerX &&
+// cenário
+ctx.drawImage(bg,bgX,0,canvas.width,canvas.height)
+ctx.drawImage(bg,bgX + canvas.width,0,canvas.width,canvas.height)
+
+// prédios / obstáculos
+ctx.fillStyle = "#2c3e50"
+
+pipes.forEach(pipe=>{
+
+ctx.fillRect(pipe.x,0,pipeWidth,pipe.top)
+
+ctx.fillRect(
+pipe.x,
+pipe.bottom,
+pipeWidth,
+canvas.height - pipe.bottom
+)
+
+})
+
+// jogador
+ctx.fillStyle = "red"
+ctx.fillRect(player.x,player.y,player.size,player.size)
+
+// pontuação
+ctx.fillStyle="black"
+ctx.font="30px Arial"
+ctx.fillText("Score: "+score,10,40)
+
+}
+
+// loop
+function gameLoop(){
+
+update()
+draw()
+
+requestAnimationFrame(gameLoop)
+
+}
+
+gameLoop()
+
+// reiniciar
+function restart(){
+
+player.y = 300
+player.vel = 0
+pipes = []
+score = 0
+
+}
+
+</script>
+
+</body>
+</html>
+```
 (
 plane.y < gapY ||
 plane.y + plane.height > gapY + gapSize
@@ -182,4 +282,5 @@ loop()
 </script>
 
 </body>
+
 </html>
