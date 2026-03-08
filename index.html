@@ -6,7 +6,6 @@
 <title>Jogo da Cidade</title>
 
 <style>
-
 body{
 margin:0;
 overflow:hidden;
@@ -17,7 +16,6 @@ canvas{
 display:block;
 margin:auto;
 }
-
 </style>
 </head>
 
@@ -30,13 +28,11 @@ margin:auto;
 const canvas = document.getElementById("game")
 const ctx = canvas.getContext("2d")
 
-// carregar cenário
 const bg = new Image()
 bg.src = "cenario.png"
 
 let bgX = 0
 
-// jogador
 let player = {
 x:80,
 y:300,
@@ -47,13 +43,11 @@ vel:0
 let gravity = 0.5
 let jump = -8
 
-// obstáculos
 let pipes = []
 let pipeWidth = 80
 let gap = 170
 let speed = 2
 
-// pontuação
 let score = 0
 
 function createPipe(){
@@ -71,9 +65,8 @@ passed:false
 
 setInterval(createPipe,2000)
 
-// controles
 document.addEventListener("keydown",e=>{
-if(e.code === "Space"){
+if(e.code==="Space"){
 player.vel = jump
 }
 })
@@ -82,7 +75,6 @@ canvas.addEventListener("click",()=>{
 player.vel = jump
 })
 
-// atualizar jogo
 function update(){
 
 player.vel += gravity
@@ -95,13 +87,11 @@ pipes.forEach(pipe=>{
 
 pipe.x -= speed
 
-// pontuação
 if(!pipe.passed && pipe.x + pipeWidth < player.x){
 pipe.passed = true
 score++
 }
 
-// colisão
 if(
 player.x < pipe.x + pipeWidth &&
 player.x + player.size > pipe.x &&
@@ -117,7 +107,6 @@ restart()
 
 pipes = pipes.filter(p=>p.x + pipeWidth > 0)
 
-// mover cenário
 bgX -= 0.5
 if(bgX <= -canvas.width){
 bgX = 0
@@ -125,53 +114,40 @@ bgX = 0
 
 }
 
-// desenhar
 function draw(){
 
-// cenário
 ctx.drawImage(bg,bgX,0,canvas.width,canvas.height)
 ctx.drawImage(bg,bgX + canvas.width,0,canvas.width,canvas.height)
 
-// prédios / obstáculos
-ctx.fillStyle = "#2c3e50"
+ctx.fillStyle="#2c3e50"
 
 pipes.forEach(pipe=>{
 
 ctx.fillRect(pipe.x,0,pipeWidth,pipe.top)
 
-ctx.fillRect(
-pipe.x,
-pipe.bottom,
-pipeWidth,
-canvas.height - pipe.bottom
-)
+ctx.fillRect(pipe.x,pipe.bottom,pipeWidth,canvas.height-pipe.bottom)
 
 })
 
-// jogador
-ctx.fillStyle = "red"
+ctx.fillStyle="red"
 ctx.fillRect(player.x,player.y,player.size,player.size)
 
-// pontuação
 ctx.fillStyle="black"
 ctx.font="30px Arial"
 ctx.fillText("Score: "+score,10,40)
 
 }
 
-// loop
 function gameLoop(){
-
 update()
 draw()
-
 requestAnimationFrame(gameLoop)
-
 }
 
+bg.onload = function(){
 gameLoop()
+}
 
-// reiniciar
 function restart(){
 
 player.y = 300
@@ -186,101 +162,3 @@ score = 0
 </body>
 </html>
 ```
-(
-plane.y < gapY ||
-plane.y + plane.height > gapY + gapSize
-)
-){
-gameOver = true
-}
-
-}
-
-function update(){
-
-if(gameOver) return
-
-plane.velocity += gravity
-plane.y += plane.velocity
-
-if(plane.y < 0){
-plane.y = 0
-plane.velocity = 0
-}
-
-if(plane.y > canvas.height - plane.height){
-gameOver = true
-}
-
-towerX -= speed
-
-if(towerX < -60){
-towerX = 400
-gapY = Math.random() * 300
-passed = false
-}
-
-if(towerX + 60 < plane.x && !passed){
-score++
-passed = true
-}
-
-checkCollision()
-
-}
-
-function draw(){
-
-ctx.clearRect(0,0,400,600)
-
-// jogador
-ctx.fillStyle = "red"
-ctx.fillRect(plane.x, plane.y, plane.width, plane.height)
-
-// torres
-ctx.fillStyle = "gray"
-
-ctx.fillRect(towerX,0,60,gapY)
-
-ctx.fillRect(
-towerX,
-gapY + gapSize,
-60,
-600
-)
-
-// score
-ctx.fillStyle = "black"
-ctx.font = "24px Arial"
-ctx.fillText("Score: " + score, 10, 30)
-
-// tela de derrota
-if(gameOver){
-
-ctx.fillStyle = "black"
-ctx.font = "40px Arial"
-ctx.fillText("allahu akbar!", 120, 300)
-
-ctx.font = "20px Arial"
-ctx.fillText("Press SPACE to restart", 90, 340)
-
-}
-
-}
-
-function loop(){
-
-update()
-draw()
-
-requestAnimationFrame(loop)
-
-}
-
-loop()
-
-</script>
-
-</body>
-
-</html>
