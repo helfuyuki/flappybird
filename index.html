@@ -9,7 +9,6 @@ body{
 margin:0;
 background:skyblue;
 overflow:hidden;
-touch-action: manipulation;
 }
 
 canvas{
@@ -19,7 +18,6 @@ background:white;
 border:2px solid black;
 }
 </style>
-
 </head>
 
 <body>
@@ -42,7 +40,7 @@ velocity:0
 let gravity = 0.4;
 let jump = -8;
 
-let towerX = 400;
+let towerX = canvas.width;
 let gapY = 200;
 let gapSize = 180;
 
@@ -56,22 +54,18 @@ function action(){
 
 if(allahuAkbar){
 resetGame();
-allahuAkbar = false;
 }else{
 plane.velocity = jump;
 }
 
 }
 
-document.addEventListener("keydown", function(e){
-if(e.code === "Space"){
-action();
-}
+document.addEventListener("keydown", e=>{
+if(e.code === "Space") action();
 });
 
 canvas.addEventListener("mousedown", action);
-
-canvas.addEventListener("touchstart", function(e){
+canvas.addEventListener("touchstart", e=>{
 e.preventDefault();
 action();
 });
@@ -81,11 +75,12 @@ function resetGame(){
 plane.y = 300;
 plane.velocity = 0;
 
-towerX = 400;
-gapY = Math.random() * (canvas.height - gapSize);
+towerX = canvas.width;
+gapY = Math.random()*(canvas.height-gapSize);
 
 score = 0;
 passed = false;
+allahuAkbar = false;
 
 }
 
@@ -116,7 +111,7 @@ plane.y = 0;
 plane.velocity = 0;
 }
 
-if(plane.y > canvas.height - plane.height){
+if(plane.y > canvas.height-plane.height){
 allahuAkbar = true;
 }
 
@@ -124,4 +119,61 @@ towerX -= speed;
 
 if(towerX < -60){
 towerX = canvas.width;
-gapY = Math.random() * (canvas.height - gap
+gapY = Math.random()*(canvas.height-gapSize);
+passed = false;
+}
+
+if(towerX + 60 < plane.x && !passed){
+score++;
+passed = true;
+}
+
+checkCollision();
+
+}
+
+function draw(){
+
+ctx.clearRect(0,0,canvas.width,canvas.height);
+
+// jogador
+ctx.fillStyle="red";
+ctx.fillRect(plane.x,plane.y,plane.width,plane.height);
+
+// torres
+ctx.fillStyle="gray";
+ctx.fillRect(towerX,0,60,gapY);
+ctx.fillRect(towerX,gapY+gapSize,60,canvas.height);
+
+// score
+ctx.fillStyle="black";
+ctx.font="24px Arial";
+ctx.fillText("Score: "+score,10,30);
+
+// derrota
+if(allahuAkbar){
+
+ctx.font="40px Arial";
+ctx.fillText("Allahu Akbar",70,300);
+
+ctx.font="20px Arial";
+ctx.fillText("Tap or SPACE to restart",70,340);
+
+}
+
+}
+
+function loop(){
+
+update();
+draw();
+requestAnimationFrame(loop);
+
+}
+
+loop();
+
+</script>
+
+</body>
+</html>
