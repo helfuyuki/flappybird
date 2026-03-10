@@ -65,9 +65,14 @@ let speed = 2;
 let score = 0;
 let passed = false;
 
-/* GAME STATE */
+/* ESTADO DO JOGO */
 
+let gameState = "menu";
 let gameOver = false;
+
+let menuOption = 0;
+let jumpKey = "Space";
+let waitingKey = false;
 
 /* IMAGENS */
 
@@ -79,8 +84,8 @@ img.src = "frame"+i+".png";
 frames.push(img);
 }
 
-const fallingImage = new Image();
-fallingImage.src = "caindo.png";
+const fallImage = new Image();
+fallImage.src = "caindo.png";
 
 /* ANIMAÇÃO */
 
@@ -92,6 +97,19 @@ let frameSpeed = 5;
 
 function action(){
 
+if(gameState === "menu"){
+
+if(menuOption === 0){
+gameState = "game";
+}
+
+if(menuOption === 1){
+waitingKey = true;
+}
+
+return;
+}
+
 if(gameOver){
 resetGame();
 return;
@@ -101,15 +119,39 @@ plane.velocity = jump;
 
 }
 
+/* TECLADO */
+
 document.addEventListener("keydown",function(e){
 
-if(e.code === "Space"){
+if(gameState === "menu"){
+
+if(waitingKey){
+jumpKey = e.code;
+waitingKey = false;
+return;
+}
+
+if(e.code === "ArrowUp") menuOption = 0;
+if(e.code === "ArrowDown") menuOption = 1;
+
+if(e.code === "Enter"){
+action();
+}
+
+return;
+}
+
+if(e.code === jumpKey){
 action();
 }
 
 });
 
+/* MOUSE */
+
 canvas.addEventListener("mousedown",action);
+
+/* TOUCH */
 
 canvas.addEventListener("touchstart",function(e){
 e.preventDefault();
@@ -160,6 +202,7 @@ gameOver = true;
 
 function update(delta){
 
+if(gameState !== "game") return;
 if(gameOver) return;
 
 plane.velocity += gravity * delta;
@@ -221,8 +264,10 @@ ctx.clearRect(0,0,canvas.width,canvas.height);
 
 /* PERSONAGEM */
 
+if(gameState === "game"){
+
 if(plane.velocity > 0){
-ctx.drawImage(fallingImage,plane.x,plane.y,plane.width,plane.height);
+ctx.drawImage(fallImage,plane.x,plane.y,plane.width,plane.height);
 }else{
 ctx.drawImage(frames[currentFrame],plane.x,plane.y,plane.width,plane.height);
 }
@@ -239,6 +284,8 @@ ctx.fillStyle="black";
 ctx.font="24px Arial";
 ctx.fillText("Score: "+score,10,30);
 
+}
+
 /* GAME OVER */
 
 if(gameOver){
@@ -249,6 +296,34 @@ ctx.fillText("Game Over",110,300);
 
 ctx.font="20px Arial";
 ctx.fillText("Press Jump to Restart",90,340);
+
+}
+
+/* MENU */
+
+if(gameState === "menu"){
+
+ctx.fillStyle="black";
+ctx.font="30px Arial";
+ctx.fillText("Plane Game",120,150);
+
+ctx.font="20px Arial";
+
+if(menuOption === 0){
+ctx.fillText("> Start Game",130,250);
+}else{
+ctx.fillText("Start Game",130,250);
+}
+
+if(menuOption === 1){
+ctx.fillText("> Change Jump Key",110,300);
+}else{
+ctx.fillText("Change Jump Key",110,300);
+}
+
+if(waitingKey){
+ctx.fillText("Press a new key...",110,360);
+}
 
 }
 
