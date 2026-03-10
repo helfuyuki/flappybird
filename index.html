@@ -62,6 +62,11 @@ let gameState = "menu";
 let menuOption = 0;
 let jumpKey = "Space";
 let waitingKey = false;
+let isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+if(isMobile){
+gameState = "game";
+}
 
 function action(){
 
