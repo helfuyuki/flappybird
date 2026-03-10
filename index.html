@@ -9,6 +9,10 @@ body{
 margin:0;
 background:skyblue;
 overflow:hidden;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
 }
 
 canvas{
@@ -16,13 +20,15 @@ display:block;
 margin:auto;
 background:white;
 border:2px solid black;
+max-width:95vw;
+height: auto;
 }
 </style>
 </head>
 
 <body>
 
-<canvas id="game" width="400" height="600"></canvas>
+<canvas id="game" width="400" height="800"></canvas>
 
 <script>
 
