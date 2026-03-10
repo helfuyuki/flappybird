@@ -65,7 +65,7 @@ let speed = 2;
 let score = 0;
 let passed = false;
 
-/* ESTADO */
+/* GAME STATE */
 
 let gameOver = false;
 
@@ -78,6 +78,9 @@ let img = new Image();
 img.src = "frame"+i+".png";
 frames.push(img);
 }
+
+const fallingImage = new Image();
+fallingImage.src = "caindo.png";
 
 /* ANIMAÇÃO */
 
@@ -154,8 +157,6 @@ function update(delta){
 
 if(gameOver) return;
 
-/* FÍSICA */
-
 plane.velocity += gravity * delta;
 plane.y += plane.velocity * delta;
 
@@ -186,7 +187,9 @@ passed = true;
 
 checkCollision();
 
-/* ANIMAÇÃO */
+/* ANIMAÇÃO DE VOO */
+
+if(plane.velocity < 0){
 
 frameTimer += delta;
 
@@ -203,6 +206,8 @@ currentFrame = 0;
 
 }
 
+}
+
 /* DESENHO */
 
 function draw(){
@@ -211,7 +216,11 @@ ctx.clearRect(0,0,canvas.width,canvas.height);
 
 /* PERSONAGEM */
 
+if(plane.velocity > 0){
+ctx.drawImage(fallingImage,plane.x,plane.y,plane.width,plane.height);
+}else{
 ctx.drawImage(frames[currentFrame],plane.x,plane.y,plane.width,plane.height);
+}
 
 /* TORRES */
 
