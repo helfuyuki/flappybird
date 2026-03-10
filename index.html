@@ -222,27 +222,24 @@ function update(delta){
 if(gameState !== "game") return;
 if(allahuAkbar) return;
 
-/* QUEDA */
-
-if(falling){
+/* FÍSICA DO PERSONAGEM */
 
 plane.velocity += gravity * delta;
 plane.y += plane.velocity * delta;
 
-if(plane.y >= canvas.height-plane.height){
-plane.y = canvas.height-plane.height;
-falling = false;
-allahuAkbar = true;
+/* MOVIMENTO DAS TORRES (sempre continua) */
+
+towerX -= speed * delta;
+
+if(towerX < -60){
+towerX = canvas.width;
+gapY = Math.random()*(canvas.height-gapSize);
+passed = false;
 }
 
-return;
+/* QUANDO NÃO ESTÁ CAINDO */
 
-}
-
-/* FÍSICA NORMAL */
-
-plane.velocity += gravity * delta;
-plane.y += plane.velocity * delta;
+if(!falling){
 
 if(plane.y < 0){
 plane.y = 0;
@@ -253,14 +250,6 @@ if(plane.y > canvas.height-plane.height){
 falling = true;
 }
 
-towerX -= speed * delta;
-
-if(towerX < -60){
-towerX = canvas.width;
-gapY = Math.random()*(canvas.height-gapSize);
-passed = false;
-}
-
 if(towerX + 60 < plane.x && !passed){
 score++;
 passed = true;
@@ -268,7 +257,7 @@ passed = true;
 
 checkCollision();
 
-/* ANIMAÇÃO */
+/* ANIMAÇÃO DE VOO */
 
 frameTimer += delta;
 
@@ -278,6 +267,19 @@ currentFrame++;
 
 if(currentFrame >= frames.length){
 currentFrame = 0;
+}
+}
+
+}
+
+/* QUANDO ESTÁ CAINDO */
+
+if(plane.y >= canvas.height-plane.height){
+plane.y = canvas.height-plane.height;
+
+if(falling){
+falling = false;
+allahuAkbar = true;
 }
 }
 
