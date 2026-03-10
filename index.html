@@ -111,7 +111,25 @@ action();
 });
 
 canvas.addEventListener("mousedown", action);
-canvas.addEventListener("touchstart", action);
+canvas.addEventListener("touchstart", function(){
+
+if(gameState === "menu"){
+
+if(menuOption === 0){
+gameState = "game";
+}
+
+if(menuOption === 1){
+waitingKey = true;
+}
+
+return;
+
+}
+
+action();
+
+});
 
 function resetGame(){
 
