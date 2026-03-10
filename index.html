@@ -70,16 +70,39 @@ resetGame();
 plane.velocity = jump;
 }
 
+document.addEventListener("keydown", function(e){
+
+if(gameState === "menu"){
+
+if(waitingKey){
+jumpKey = e.code;
+waitingKey = false;
+return;
 }
 
-document.addEventListener("keydown", e=>{
-if(e.code === "Space") action();
-});
+if(e.code === "ArrowUp") menuOption = 0;
+if(e.code === "ArrowDown") menuOption = 1;
 
-canvas.addEventListener("mousedown", action);
-canvas.addEventListener("touchstart", e=>{
-e.preventDefault();
+if(e.code === "Enter"){
+
+if(menuOption === 0){
+gameState = "game";
+}
+
+if(menuOption === 1){
+waitingKey = true;
+}
+
+}
+
+return;
+
+}
+
+if(e.code === jumpKey){
 action();
+}
+
 });
 
 function resetGame(){
@@ -93,6 +116,10 @@ gapY = Math.random()*(canvas.height-gapSize);
 score = 0;
 passed = false;
 allahuAkbar = false;
+let gameState = "menu";
+let menuOption = 0;
+let jumpKey = "Space";
+let waitingKey = false;
 
 }
 
@@ -112,7 +139,7 @@ allahuAkbar = true;
 }
 
 function update(){
-if(!gameStarted) return;
+if(gameState !== "game") return;
 
 if(allahuAkbar) return;
 
@@ -177,8 +204,29 @@ if(!gameStarted){
 ctx.fillStyle="black";
 ctx.font="30px Arial";
 ctx.fillText("Tap to Start",120,300);
-
 }
+if(gameState === "menu"){
+
+ctx.fillStyle="black";
+ctx.font="30px Arial";
+ctx.fillText("Plane Game",120,150);
+
+ctx.font="20px Arial";
+
+if(menuOption === 0){
+ctx.fillText("> Start Game",130,250);
+}else{
+ctx.fillText("Start Game",130,250);
+}
+
+if(menuOption === 1){
+ctx.fillText("> Change Jump Key",110,300);
+}else{
+ctx.fillText("Change Jump Key",110,300);
+}
+  
+}
+
 }
 
 function loop(){
