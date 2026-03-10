@@ -6,6 +6,7 @@
 <title>Plane Game</title>
 
 <style>
+
 body{
 margin:0;
 background:skyblue;
@@ -23,6 +24,7 @@ width:85vw;
 max-width:420px;
 height:auto;
 }
+
 </style>
 </head>
 
@@ -55,19 +57,23 @@ let speed = 1.5;
 let score = 0;
 let passed = false;
 let allahuAkbar = false;
-let gameStarted = false;
+
+let gameState = "menu";
+let menuOption = 0;
+let jumpKey = "Space";
+let waitingKey = false;
 
 function action(){
 
-if(!gameStarted){
-gameStarted = true;
+if(allahuAkbar){
+resetGame();
 return;
 }
 
-if(allahuAkbar){
-resetGame();
-}else{
+if(gameState === "game"){
 plane.velocity = jump;
+}
+
 }
 
 document.addEventListener("keydown", function(e){
@@ -96,7 +102,6 @@ waitingKey = true;
 }
 
 return;
-
 }
 
 if(e.code === jumpKey){
@@ -104,6 +109,9 @@ action();
 }
 
 });
+
+canvas.addEventListener("mousedown", action);
+canvas.addEventListener("touchstart", action);
 
 function resetGame(){
 
@@ -116,10 +124,7 @@ gapY = Math.random()*(canvas.height-gapSize);
 score = 0;
 passed = false;
 allahuAkbar = false;
-let gameState = "menu";
-let menuOption = 0;
-let jumpKey = "Space";
-let waitingKey = false;
+gameState = "menu";
 
 }
 
@@ -139,8 +144,8 @@ allahuAkbar = true;
 }
 
 function update(){
-if(gameState !== "game") return;
 
+if(gameState !== "game") return;
 if(allahuAkbar) return;
 
 plane.velocity += gravity;
@@ -197,14 +202,11 @@ ctx.font="40px Arial";
 ctx.fillText("Allahu Akbar",70,300);
 
 ctx.font="20px Arial";
-ctx.fillText("Tap or SPACE to restart",70,340);
-}
-if(!gameStarted){
+ctx.fillText("Press Jump to Restart",70,340);
 
-ctx.fillStyle="black";
-ctx.font="30px Arial";
-ctx.fillText("Tap to Start",120,300);
 }
+
+// menu
 if(gameState === "menu"){
 
 ctx.fillStyle="black";
@@ -224,7 +226,11 @@ ctx.fillText("> Change Jump Key",110,300);
 }else{
 ctx.fillText("Change Jump Key",110,300);
 }
-  
+
+if(waitingKey){
+ctx.fillText("Press a new key...",110,360);
+}
+
 }
 
 }
