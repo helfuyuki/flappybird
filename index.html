@@ -100,6 +100,8 @@ let currentFrame = 0;
 let frameTimer = 0;
 let frameSpeed = 4;
 
+/* AÇÃO */
+
 function action(){
 
 if(allahuAkbar){
@@ -112,6 +114,8 @@ plane.velocity = jump;
 }
 
 }
+
+/* TECLADO */
 
 document.addEventListener("keydown", function(e){
 
@@ -147,7 +151,11 @@ action();
 
 });
 
+/* MOUSE */
+
 canvas.addEventListener("mousedown", action);
+
+/* TOUCH */
 
 canvas.addEventListener("touchstart", function(e){
 
@@ -171,6 +179,8 @@ action();
 
 },{passive:false});
 
+/* RESET */
+
 function resetGame(){
 
 plane.y = 300;
@@ -182,10 +192,13 @@ gapY = Math.random()*(canvas.height-gapSize);
 score = 0;
 passed = false;
 allahuAkbar = false;
+falling = false;
 
 gameState = "game";
 
 }
+
+/* COLISÃO */
 
 function checkCollision(){
 
@@ -202,10 +215,31 @@ falling = true;
 
 }
 
+/* UPDATE */
+
 function update(delta){
 
 if(gameState !== "game") return;
 if(allahuAkbar) return;
+
+/* QUEDA */
+
+if(falling){
+
+plane.velocity += gravity * delta;
+plane.y += plane.velocity * delta;
+
+if(plane.y >= canvas.height-plane.height){
+plane.y = canvas.height-plane.height;
+falling = false;
+allahuAkbar = true;
+}
+
+return;
+
+}
+
+/* FÍSICA NORMAL */
 
 plane.velocity += gravity * delta;
 plane.y += plane.velocity * delta;
@@ -249,6 +283,8 @@ currentFrame = 0;
 
 }
 
+/* DESENHO */
+
 function draw(){
 
 ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -257,7 +293,9 @@ if(gameState === "game"){
 
 /* PERSONAGEM */
 
-if(plane.velocity > 0){
+if(falling){
+ctx.drawImage(fallImage, plane.x, plane.y, plane.width, plane.height);
+}else if(plane.velocity > 0){
 ctx.drawImage(fallImage, plane.x, plane.y, plane.width, plane.height);
 }else{
 ctx.drawImage(frames[currentFrame], plane.x, plane.y, plane.width, plane.height);
@@ -287,6 +325,8 @@ ctx.fillText("Press Jump to Restart",70,340);
 
 }
 
+/* MENU */
+
 if(gameState === "menu"){
 
 ctx.fillStyle="black";
@@ -315,6 +355,8 @@ ctx.fillText("Press a new key...",110,360);
 
 }
 
+/* LOOP */
+
 let lastTime = 0;
 
 function loop(time){
@@ -323,26 +365,7 @@ let delta = (time - lastTime) / 16.67;
 lastTime = time;
 
 update(delta);
-if(falling){
-
-plane.velocity += gravity * delta;
-plane.y += plane.velocity * delta;
-
-if(plane.y >= canvas.height-plane.height){
-plane.y = canvas.height-plane.height;
-falling = false;
-allahuAkbar = true;
-}
-
-return;
-
-}
 draw();
-if(falling){
-ctx.drawImage(fallImage, plane.x, plane.y, plane.width, plane.height);
-}else{
-ctx.drawImage(frames[currentFrame], plane.x, plane.y, plane.width, plane.height);
-}
 
 requestAnimationFrame(loop);
 
