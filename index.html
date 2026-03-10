@@ -59,7 +59,6 @@ let falling = false;
 let towerX = canvas.width;
 let gapY = 200;
 let gapSize = 200;
-
 let speed = 2;
 
 /* SCORE */
@@ -85,8 +84,8 @@ gameState = "game";
 
 const frames = [];
 
-for(let i = 1; i <= 5; i++){
-const img = new Image();
+for(let i=1;i<=5;i++){
+let img = new Image();
 img.src = "frame"+i+".png";
 frames.push(img);
 }
@@ -109,7 +108,7 @@ resetGame();
 return;
 }
 
-if(gameState === "game"){
+if(gameState === "game" && !falling){
 plane.velocity = jump;
 }
 
@@ -117,7 +116,7 @@ plane.velocity = jump;
 
 /* TECLADO */
 
-document.addEventListener("keydown", function(e){
+document.addEventListener("keydown",function(e){
 
 if(gameState === "menu"){
 
@@ -153,22 +152,22 @@ action();
 
 /* MOUSE */
 
-canvas.addEventListener("mousedown", action);
+canvas.addEventListener("mousedown",action);
 
 /* TOUCH */
 
-canvas.addEventListener("touchstart", function(e){
+canvas.addEventListener("touchstart",function(e){
 
 e.preventDefault();
 
 if(gameState === "menu"){
 
 if(menuOption === 0){
-gameState = "game";
+gameState="game";
 }
 
 if(menuOption === 1){
-waitingKey = true;
+waitingKey=true;
 }
 
 return;
@@ -191,16 +190,16 @@ gapY = Math.random()*(canvas.height-gapSize);
 
 score = 0;
 passed = false;
-allahuAkbar = false;
 falling = false;
-
-gameState = "game";
+allahuAkbar = false;
 
 }
 
 /* COLISÃO */
 
 function checkCollision(){
+
+if(falling) return;
 
 if(
 plane.x + plane.width > towerX &&
@@ -210,8 +209,10 @@ plane.y < gapY ||
 plane.y + plane.height > gapY + gapSize
 )
 ){
+
 falling = true;
-plane.velocity = 2;
+plane.velocity = 3;
+
 }
 
 }
@@ -227,17 +228,6 @@ if(allahuAkbar) return;
 
 plane.velocity += gravity * delta;
 plane.y += plane.velocity * delta;
-
-/* CHÃO */
-
-if(plane.y >= canvas.height-plane.height){
-plane.y = canvas.height-plane.height;
-
-if(falling){
-allahuAkbar = true;
-}
-
-}
 
 /* TORRES */
 
@@ -258,21 +248,35 @@ passed = true;
 
 /* COLISÃO */
 
-if(!falling){
 checkCollision();
+
+/* CHÃO */
+
+if(plane.y >= canvas.height-plane.height){
+plane.y = canvas.height-plane.height;
+
+if(falling){
+allahuAkbar = true;
+}
 }
 
 /* ANIMAÇÃO */
 
+if(!falling){
+
 frameTimer += delta;
 
 if(frameTimer >= frameSpeed){
+
 frameTimer = 0;
 currentFrame++;
 
 if(currentFrame >= frames.length){
 currentFrame = 0;
 }
+
+}
+
 }
 
 }
@@ -288,11 +292,9 @@ if(gameState === "game"){
 /* PERSONAGEM */
 
 if(falling){
-ctx.drawImage(fallImage, plane.x, plane.y, plane.width, plane.height);
-}else if(plane.velocity > 0){
-ctx.drawImage(fallImage, plane.x, plane.y, plane.width, plane.height);
+ctx.drawImage(fallImage,plane.x,plane.y,plane.width,plane.height);
 }else{
-ctx.drawImage(frames[currentFrame], plane.x, plane.y, plane.width, plane.height);
+ctx.drawImage(frames[currentFrame],plane.x,plane.y,plane.width,plane.height);
 }
 
 /* TORRES */
@@ -357,7 +359,7 @@ let lastTime = 0;
 
 function loop(time){
 
-let delta = (time - lastTime) / 16.67;
+let delta = (time-lastTime)/16.67;
 lastTime = time;
 
 update(delta);
