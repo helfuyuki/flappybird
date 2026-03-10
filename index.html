@@ -257,13 +257,20 @@ ctx.fillText("Press a new key...",110,360);
 
 }
 
-function loop(){
+function loop(time){
 
-update();
+let delta = (time - lastTime) / 16.67;
+lastTime = time;
+
+update(delta);
 draw();
+
 requestAnimationFrame(loop);
 
 }
+
+}
+let lastTime = 0;
 
 loop();
 
