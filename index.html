@@ -45,13 +45,14 @@ ctx.imageSmoothingEnabled = false;
 let plane = {
 x:80,
 y:300,
-width:40,
-height:40,
+width:80,
+height:80,
 velocity:0
 };
 
 let gravity = 0.2;
 let jump = -6;
+let falling = false;
 
 /* TORRES */
 
@@ -196,7 +197,7 @@ plane.y < gapY ||
 plane.y + plane.height > gapY + gapSize
 )
 ){
-allahuAkbar = true;
+falling = true;
 }
 
 }
@@ -215,7 +216,7 @@ plane.velocity = 0;
 }
 
 if(plane.y > canvas.height-plane.height){
-allahuAkbar = true;
+falling = true;
 }
 
 towerX -= speed * delta;
@@ -322,7 +323,26 @@ let delta = (time - lastTime) / 16.67;
 lastTime = time;
 
 update(delta);
+if(falling){
+
+plane.velocity += gravity * delta;
+plane.y += plane.velocity * delta;
+
+if(plane.y >= canvas.height-plane.height){
+plane.y = canvas.height-plane.height;
+falling = false;
+allahuAkbar = true;
+}
+
+return;
+
+}
 draw();
+if(falling){
+ctx.drawImage(fallImage, plane.x, plane.y, plane.width, plane.height);
+}else{
+ctx.drawImage(frames[currentFrame], plane.x, plane.y, plane.width, plane.height);
+}
 
 requestAnimationFrame(loop);
 
