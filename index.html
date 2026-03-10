@@ -38,6 +38,10 @@ touch-action:none;
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
+ctx.imageSmoothingEnabled = false;
+
+/* PERSONAGEM */
+
 let plane = {
 x:80,
 y:300,
@@ -49,15 +53,21 @@ velocity:0
 let gravity = 0.2;
 let jump = -6;
 
+/* TORRES */
+
 let towerX = canvas.width;
 let gapY = 200;
 let gapSize = 180;
 
 let speed = 1.5;
 
+/* SCORE */
+
 let score = 0;
 let passed = false;
 let allahuAkbar = false;
+
+/* MENU */
 
 let gameState = "menu";
 let menuOption = 0;
@@ -69,6 +79,25 @@ let isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 if(isMobile){
 gameState = "game";
 }
+
+/* IMAGENS */
+
+const frames = [];
+
+for(let i = 1; i <= 5; i++){
+const img = new Image();
+img.src = "frame" + i + ".png";
+frames.push(img);
+}
+
+const fallImage = new Image();
+fallImage.src = "caindo.png";
+
+/* ANIMAÇÃO */
+
+let currentFrame = 0;
+let frameTimer = 0;
+let frameSpeed = 4;
 
 function action(){
 
@@ -153,8 +182,6 @@ score = 0;
 passed = false;
 allahuAkbar = false;
 
-/* NÃO VOLTA MAIS PARA O MENU */
-
 gameState = "game";
 
 }
@@ -206,6 +233,19 @@ passed = true;
 
 checkCollision();
 
+/* ANIMAÇÃO */
+
+frameTimer += delta;
+
+if(frameTimer >= frameSpeed){
+frameTimer = 0;
+currentFrame++;
+
+if(currentFrame >= frames.length){
+currentFrame = 0;
+}
+}
+
 }
 
 function draw(){
@@ -214,12 +254,21 @@ ctx.clearRect(0,0,canvas.width,canvas.height);
 
 if(gameState === "game"){
 
-ctx.fillStyle="red";
-ctx.fillRect(plane.x,plane.y,plane.width,plane.height);
+/* PERSONAGEM */
+
+if(plane.velocity > 0){
+ctx.drawImage(fallImage, plane.x, plane.y, plane.width, plane.height);
+}else{
+ctx.drawImage(frames[currentFrame], plane.x, plane.y, plane.width, plane.height);
+}
+
+/* TORRES */
 
 ctx.fillStyle="gray";
 ctx.fillRect(towerX,0,60,gapY);
 ctx.fillRect(towerX,gapY+gapSize,60,canvas.height);
+
+/* SCORE */
 
 ctx.fillStyle="black";
 ctx.font="24px Arial";
