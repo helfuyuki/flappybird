@@ -17,8 +17,9 @@ align-items:center;
 height:100vh;
 }
 
+/* tamanho fixo evita reescalonamento pesado */
 canvas{
-background:black;
+background:white;
 border:2px solid black;
 touch-action:none;
 }
@@ -35,16 +36,7 @@ touch-action:none;
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-/* BACKGROUND */
-
-const bg = new Image();
-bg.src = "cenario.png.png";
-
-let bgY = 0;
-let bgSpeed = 0.5;
-
-/* PLAYER */
-
+/* jogador */
 let plane = {
 x:80,
 y:300,
@@ -56,20 +48,18 @@ v:0
 let gravity = 0.5;
 let jump = -9;
 
-/* TOWERS */
-
+/* torres */
 let towerX = canvas.width;
 let gapY = 200;
 let gapSize = 170;
 let speed = 2;
 
-/* GAME STATE */
-
+/* estado */
 let score = 0;
 let passed = false;
 let dead = false;
 
-/* INPUT */
+/* input */
 
 function jumpAction(){
 
@@ -86,14 +76,14 @@ document.addEventListener("keydown",(e)=>{
 if(e.code==="Space") jumpAction();
 });
 
-canvas.addEventListener("mousedown",jumpAction);
-
 canvas.addEventListener("touchstart",(e)=>{
 e.preventDefault();
 jumpAction();
 },{passive:false});
 
-/* RESET */
+canvas.addEventListener("mousedown",jumpAction);
+
+/* reset */
 
 function resetGame(){
 
@@ -109,7 +99,7 @@ dead=false;
 
 }
 
-/* COLLISION */
+/* colisão */
 
 function collision(){
 
@@ -126,7 +116,7 @@ dead=true;
 
 }
 
-/* UPDATE */
+/* update */
 
 function update(){
 
@@ -159,45 +149,32 @@ passed=true;
 
 collision();
 
-/* BACKGROUND MOVE */
-
-bgY+=bgSpeed;
-
-if(bgY>=canvas.height){
-bgY=0;
 }
 
-}
-
-/* DRAW */
+/* draw */
 
 function draw(){
 
 ctx.clearRect(0,0,canvas.width,canvas.height);
 
-/* BACKGROUND */
-
-ctx.drawImage(bg,0,bgY-canvas.height,canvas.width,canvas.height);
-ctx.drawImage(bg,0,bgY,canvas.width,canvas.height);
-
-/* PLAYER */
+/* player */
 
 ctx.fillStyle="red";
 ctx.fillRect(plane.x,plane.y,plane.w,plane.h);
 
-/* TOWERS */
+/* towers */
 
 ctx.fillStyle="gray";
 ctx.fillRect(towerX,0,60,gapY);
 ctx.fillRect(towerX,gapY+gapSize,60,canvas.height);
 
-/* SCORE */
+/* score */
 
 ctx.fillStyle="black";
 ctx.font="22px Arial";
 ctx.fillText("Score: "+score,10,30);
 
-/* GAME OVER */
+/* death */
 
 if(dead){
 
@@ -211,7 +188,7 @@ ctx.fillText("Tap to restart",130,350);
 
 }
 
-/* LOOP */
+/* loop */
 
 function loop(){
 
