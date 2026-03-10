@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html>
 <head>
@@ -62,6 +63,7 @@ let gameState = "menu";
 let menuOption = 0;
 let jumpKey = "Space";
 let waitingKey = false;
+
 let isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
 if(isMobile){
@@ -116,6 +118,7 @@ action();
 });
 
 canvas.addEventListener("mousedown", action);
+
 canvas.addEventListener("touchstart", function(){
 
 if(gameState === "menu"){
@@ -147,7 +150,9 @@ gapY = Math.random()*(canvas.height-gapSize);
 score = 0;
 passed = false;
 allahuAkbar = false;
-gameState = "game";
+
+gameState = isMobile ? "game" : "menu";
+
 }
 
 function checkCollision(){
@@ -170,8 +175,8 @@ function update(delta){
 if(gameState !== "game") return;
 if(allahuAkbar) return;
 
-plane.velocity += gravity;
-plane.y += plane.velocity;
+plane.velocity += gravity * delta;
+plane.y += plane.velocity * delta;
 
 if(plane.y < 0){
 plane.y = 0;
@@ -182,7 +187,7 @@ if(plane.y > canvas.height-plane.height){
 allahuAkbar = true;
 }
 
-towerX -= speed;
+towerX -= speed * delta;
 
 if(towerX < -60){
 towerX = canvas.width;
@@ -203,21 +208,21 @@ function draw(){
 
 ctx.clearRect(0,0,canvas.width,canvas.height);
 
-// jogador
+if(gameState === "game"){
+
 ctx.fillStyle="red";
 ctx.fillRect(plane.x,plane.y,plane.width,plane.height);
 
-// torres
 ctx.fillStyle="gray";
 ctx.fillRect(towerX,0,60,gapY);
 ctx.fillRect(towerX,gapY+gapSize,60,canvas.height);
 
-// score
 ctx.fillStyle="black";
 ctx.font="24px Arial";
 ctx.fillText("Score: "+score,10,30);
 
-// derrota
+}
+
 if(allahuAkbar){
 
 ctx.font="40px Arial";
@@ -228,7 +233,6 @@ ctx.fillText("Press Jump to Restart",70,340);
 
 }
 
-// menu
 if(gameState === "menu"){
 
 ctx.fillStyle="black";
@@ -257,6 +261,8 @@ ctx.fillText("Press a new key...",110,360);
 
 }
 
+let lastTime = 0;
+
 function loop(time){
 
 let delta = (time - lastTime) / 16.67;
@@ -269,12 +275,10 @@ requestAnimationFrame(loop);
 
 }
 
-}
-let lastTime = 0;
-
-loop();
+requestAnimationFrame(loop);
 
 </script>
 
 </body>
 </html>
+```
