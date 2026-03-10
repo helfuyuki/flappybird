@@ -49,8 +49,14 @@ let speed = 1.5;
 let score = 0;
 let passed = false;
 let allahuAkbar = false;
+let gameStarted = false;
 
 function action(){
+
+if(!gameStarted){
+gameStarted = true;
+return;
+}
 
 if(allahuAkbar){
 resetGame();
@@ -100,6 +106,7 @@ allahuAkbar = true;
 }
 
 function update(){
+if(!gameStarted) return;
 
 if(allahuAkbar) return;
 
@@ -158,9 +165,14 @@ ctx.fillText("Allahu Akbar",70,300);
 
 ctx.font="20px Arial";
 ctx.fillText("Tap or SPACE to restart",70,340);
+}
+if(!gameStarted){
+
+ctx.fillStyle="black";
+ctx.font="30px Arial";
+ctx.fillText("Tap to Start",120,300);
 
 }
-
 }
 
 function loop(){
