@@ -50,7 +50,7 @@ height:80,
 velocity:0
 };
 
-let gravity = 0.2;
+let gravity = 0.25;
 let jump = -6;
 let falling = false;
 
@@ -58,9 +58,9 @@ let falling = false;
 
 let towerX = canvas.width;
 let gapY = 200;
-let gapSize = 180;
+let gapSize = 200;
 
-let speed = 1.5;
+let speed = 2;
 
 /* SCORE */
 
@@ -87,7 +87,7 @@ const frames = [];
 
 for(let i = 1; i <= 5; i++){
 const img = new Image();
-img.src = "frame" + i + ".png";
+img.src = "frame"+i+".png";
 frames.push(img);
 }
 
@@ -98,7 +98,7 @@ fallImage.src = "caindo.png";
 
 let currentFrame = 0;
 let frameTimer = 0;
-let frameSpeed = 4;
+let frameSpeed = 5;
 
 /* AÇÃO */
 
@@ -203,14 +203,15 @@ gameState = "game";
 function checkCollision(){
 
 if(
-plane.x < towerX + 60 &&
 plane.x + plane.width > towerX &&
+plane.x < towerX + 60 &&
 (
 plane.y < gapY ||
 plane.y + plane.height > gapY + gapSize
 )
 ){
 falling = true;
+plane.velocity = 2;
 }
 
 }
@@ -222,12 +223,23 @@ function update(delta){
 if(gameState !== "game") return;
 if(allahuAkbar) return;
 
-/* FÍSICA DO PERSONAGEM */
+/* FÍSICA */
 
 plane.velocity += gravity * delta;
 plane.y += plane.velocity * delta;
 
-/* MOVIMENTO DAS TORRES (sempre continua) */
+/* CHÃO */
+
+if(plane.y >= canvas.height-plane.height){
+plane.y = canvas.height-plane.height;
+
+if(falling){
+allahuAkbar = true;
+}
+
+}
+
+/* TORRES */
 
 towerX -= speed * delta;
 
@@ -237,27 +249,20 @@ gapY = Math.random()*(canvas.height-gapSize);
 passed = false;
 }
 
-/* QUANDO NÃO ESTÁ CAINDO */
-
-if(!falling){
-
-if(plane.y < 0){
-plane.y = 0;
-plane.velocity = 0;
-}
-
-if(plane.y > canvas.height-plane.height){
-falling = true;
-}
+/* SCORE */
 
 if(towerX + 60 < plane.x && !passed){
 score++;
 passed = true;
 }
 
-checkCollision();
+/* COLISÃO */
 
-/* ANIMAÇÃO DE VOO */
+if(!falling){
+checkCollision();
+}
+
+/* ANIMAÇÃO */
 
 frameTimer += delta;
 
@@ -267,19 +272,6 @@ currentFrame++;
 
 if(currentFrame >= frames.length){
 currentFrame = 0;
-}
-}
-
-}
-
-/* QUANDO ESTÁ CAINDO */
-
-if(plane.y >= canvas.height-plane.height){
-plane.y = canvas.height-plane.height;
-
-if(falling){
-falling = false;
-allahuAkbar = true;
 }
 }
 
@@ -316,6 +308,8 @@ ctx.font="24px Arial";
 ctx.fillText("Score: "+score,10,30);
 
 }
+
+/* GAME OVER */
 
 if(allahuAkbar){
 
