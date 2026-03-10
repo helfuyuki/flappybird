@@ -23,6 +23,7 @@ border:2px solid black;
 width:85vw;
 max-width:420px;
 height:auto;
+touch-action:none;
 }
 
 </style>
@@ -118,7 +119,9 @@ action();
 
 canvas.addEventListener("mousedown", action);
 
-canvas.addEventListener("touchstart", function(){
+canvas.addEventListener("touchstart", function(e){
+
+e.preventDefault();
 
 if(gameState === "menu"){
 
@@ -136,7 +139,7 @@ return;
 
 action();
 
-});
+},{passive:false});
 
 function resetGame(){
 
