@@ -88,7 +88,7 @@ let currentFrame = 0;
 let frameTimer = 0;
 let frameSpeed = 5;
 
-/* AÇÃO */
+/* INPUT */
 
 function action(){
 
@@ -100,8 +100,6 @@ return;
 plane.velocity = jump;
 
 }
-
-/* INPUT */
 
 document.addEventListener("keydown",function(e){
 
@@ -138,12 +136,19 @@ gameOver = false;
 
 function checkCollision(){
 
+const margin = 12;
+
+const px = plane.x + margin;
+const py = plane.y + margin;
+const pw = plane.width - margin*2;
+const ph = plane.height - margin*2;
+
 if(
-plane.x + plane.width > towerX &&
-plane.x < towerX + 60 &&
+px + pw > towerX &&
+px < towerX + 60 &&
 (
-plane.y < gapY ||
-plane.y + plane.height > gapY + gapSize
+py < gapY ||
+py + ph > gapY + gapSize
 )
 ){
 gameOver = true;
@@ -187,7 +192,7 @@ passed = true;
 
 checkCollision();
 
-/* ANIMAÇÃO DE VOO */
+/* ANIMAÇÃO */
 
 if(plane.velocity < 0){
 
