@@ -17,10 +17,12 @@ align-items:center;
 height:100vh;
 }
 
-/* tamanho fixo evita reescalonamento pesado */
 canvas{
 background:white;
 border:2px solid black;
+width:85vw;
+max-width:420px;
+height:auto;
 touch-action:none;
 }
 
@@ -29,176 +31,253 @@ touch-action:none;
 
 <body>
 
-<canvas id="game" width="400" height="700"></canvas>
+<canvas id="game" width="400" height="800"></canvas>
 
 <script>
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-/* jogador */
 let plane = {
 x:80,
 y:300,
-w:40,
-h:40,
-v:0
+width:40,
+height:40,
+velocity:0
 };
 
-let gravity = 0.5;
-let jump = -9;
+let gravity = 0.2;
+let jump = -6;
 
-/* torres */
 let towerX = canvas.width;
 let gapY = 200;
-let gapSize = 170;
-let speed = 2;
+let gapSize = 180;
 
-/* estado */
+let speed = 1.5;
+
 let score = 0;
 let passed = false;
-let dead = false;
+let allahuAkbar = false;
 
-/* input */
+let gameState = "menu";
+let menuOption = 0;
+let jumpKey = "Space";
+let waitingKey = false;
 
-function jumpAction(){
+let isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-if(dead){
+if(isMobile){
+gameState = "game";
+}
+
+function action(){
+
+if(allahuAkbar){
 resetGame();
 return;
 }
 
-plane.v = jump;
+if(gameState === "game"){
+plane.velocity = jump;
+}
 
 }
 
-document.addEventListener("keydown",(e)=>{
-if(e.code==="Space") jumpAction();
+document.addEventListener("keydown", function(e){
+
+if(gameState === "menu"){
+
+if(waitingKey){
+jumpKey = e.code;
+waitingKey = false;
+return;
+}
+
+if(e.code === "ArrowUp") menuOption = 0;
+if(e.code === "ArrowDown") menuOption = 1;
+
+if(e.code === "Enter"){
+
+if(menuOption === 0){
+gameState = "game";
+}
+
+if(menuOption === 1){
+waitingKey = true;
+}
+
+}
+
+return;
+}
+
+if(e.code === jumpKey){
+action();
+}
+
 });
 
-canvas.addEventListener("touchstart",(e)=>{
+canvas.addEventListener("mousedown", action);
+
+canvas.addEventListener("touchstart", function(e){
+
 e.preventDefault();
-jumpAction();
+
+if(gameState === "menu"){
+
+if(menuOption === 0){
+gameState = "game";
+}
+
+if(menuOption === 1){
+waitingKey = true;
+}
+
+return;
+
+}
+
+action();
+
 },{passive:false});
-
-canvas.addEventListener("mousedown",jumpAction);
-
-/* reset */
 
 function resetGame(){
 
-plane.y=300;
-plane.v=0;
+plane.y = 300;
+plane.velocity = 0;
 
-towerX=canvas.width;
-gapY=Math.random()*(canvas.height-gapSize);
+towerX = canvas.width;
+gapY = Math.random()*(canvas.height-gapSize);
 
-score=0;
-passed=false;
-dead=false;
+score = 0;
+passed = false;
+allahuAkbar = false;
+
+gameState = isMobile ? "game" : "menu";
 
 }
 
-/* colisão */
-
-function collision(){
+function checkCollision(){
 
 if(
-plane.x < towerX+60 &&
-plane.x+plane.w > towerX &&
+plane.x < towerX + 60 &&
+plane.x + plane.width > towerX &&
 (
 plane.y < gapY ||
-plane.y+plane.h > gapY+gapSize
+plane.y + plane.height > gapY + gapSize
 )
 ){
-dead=true;
+allahuAkbar = true;
 }
 
 }
 
-/* update */
+function update(delta){
 
-function update(){
+if(gameState !== "game") return;
+if(allahuAkbar) return;
 
-if(dead) return;
+plane.velocity += gravity * delta;
+plane.y += plane.velocity * delta;
 
-plane.v+=gravity;
-plane.y+=plane.v;
-
-if(plane.y<0){
-plane.y=0;
-plane.v=0;
+if(plane.y < 0){
+plane.y = 0;
+plane.velocity = 0;
 }
 
-if(plane.y>canvas.height-plane.h){
-dead=true;
+if(plane.y > canvas.height-plane.height){
+allahuAkbar = true;
 }
 
-towerX-=speed;
+towerX -= speed * delta;
 
-if(towerX<-60){
-towerX=canvas.width;
-gapY=Math.random()*(canvas.height-gapSize);
-passed=false;
+if(towerX < -60){
+towerX = canvas.width;
+gapY = Math.random()*(canvas.height-gapSize);
+passed = false;
 }
 
-if(towerX+60<plane.x && !passed){
+if(towerX + 60 < plane.x && !passed){
 score++;
-passed=true;
+passed = true;
 }
 
-collision();
+checkCollision();
 
 }
-
-/* draw */
 
 function draw(){
 
 ctx.clearRect(0,0,canvas.width,canvas.height);
 
-/* player */
+if(gameState === "game"){
 
 ctx.fillStyle="red";
-ctx.fillRect(plane.x,plane.y,plane.w,plane.h);
-
-/* towers */
+ctx.fillRect(plane.x,plane.y,plane.width,plane.height);
 
 ctx.fillStyle="gray";
 ctx.fillRect(towerX,0,60,gapY);
 ctx.fillRect(towerX,gapY+gapSize,60,canvas.height);
 
-/* score */
-
 ctx.fillStyle="black";
-ctx.font="22px Arial";
+ctx.font="24px Arial";
 ctx.fillText("Score: "+score,10,30);
 
-/* death */
+}
 
-if(dead){
+if(allahuAkbar){
 
 ctx.font="40px Arial";
-ctx.fillText("Game Over",100,320);
+ctx.fillText("Allahu Akbar",70,300);
 
 ctx.font="20px Arial";
-ctx.fillText("Tap to restart",130,350);
+ctx.fillText("Press Jump to Restart",70,340);
 
+}
+
+if(gameState === "menu"){
+
+ctx.fillStyle="black";
+ctx.font="30px Arial";
+ctx.fillText("Plane Game",120,150);
+
+ctx.font="20px Arial";
+
+if(menuOption === 0){
+ctx.fillText("> Start Game",130,250);
+}else{
+ctx.fillText("Start Game",130,250);
+}
+
+if(menuOption === 1){
+ctx.fillText("> Change Jump Key",110,300);
+}else{
+ctx.fillText("Change Jump Key",110,300);
+}
+
+if(waitingKey){
+ctx.fillText("Press a new key...",110,360);
 }
 
 }
 
-/* loop */
+}
 
-function loop(){
+let lastTime = 0;
 
-update();
+function loop(time){
+
+let delta = (time - lastTime) / 16.67;
+lastTime = time;
+
+update(delta);
 draw();
+
 requestAnimationFrame(loop);
 
 }
 
-loop();
+requestAnimationFrame(loop);
 
 </script>
 
