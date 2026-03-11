@@ -325,6 +325,9 @@ ctx.drawImage(clouds[cloud.frame],cloud.x,cloud.y,120,70);
 
 ctx.drawImage(
 pipeTop,
+0, 0,                // início do corte na imagem
+pipeTop.width, 
+pipeTop.height,      // tamanho do corte
 towerX,
 0,
 80,
@@ -333,10 +336,13 @@ gapY
 
 ctx.drawImage(
 pipeBottom,
+0, 0,
+pipeBottom.width,
+pipeBottom.height,
 towerX,
-gapY+gapSize,
+gapY + gapSize,
 80,
-canvas.height-(gapY+gapSize)
+canvas.height - (gapY + gapSize)
 );
 
 /* PERSONAGEM */
