@@ -329,7 +329,14 @@ ctx.save();
 ctx.scale(1,-1);
 ctx.drawImage(buildingTop,towerX,-gapY,60,gapY);
 ctx.restore();
-}
+
+ctx.drawImage(
+buildingBottom,
+towerX,
+gapY+gapSize,
+60,
+canvas.height-(gapY+gapSize)
+);
 
 /* PERSONAGEM */
 
@@ -391,6 +398,19 @@ ctx.fillText("Change Jump Key",110,300);
 if(waitingKey){
 ctx.fillText("Press a new key...",110,360);
 }
+
+}
+
+/* PAUSE */
+
+ctx.fillStyle="black";
+ctx.font="16px Arial";
+ctx.fillText("P to pause",canvas.width-110,20);
+
+if(paused){
+
+ctx.font="40px Arial";
+ctx.fillText("Paused",130,300);
 
 }
 
