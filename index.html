@@ -29,6 +29,7 @@ canvas {
 <!-- Adicionando Música e Som do Pulo -->
 <audio id="backgroundMusic" src="playlist.mp3" loop></audio>
 <audio id="jumpSound" src="jump.mp3"></audio>
+<audio id="menuMusic" src="kitty.mp3" loop></audio> <!-- Música do Menu -->
 <script>
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
@@ -97,17 +98,30 @@ let frameTimer = 0;
 let frameSpeed = 5;
 /* INICIALIZAÇÃO DA MÚSICA */
 const backgroundMusic = document.getElementById('backgroundMusic');
-backgroundMusic.volume = 0.4; // 60% do volume
+backgroundMusic.volume = 0.3; // Ajustado para 30% do volume
 /* INICIALIZAÇÃO DO SOM DO PULO */
 const jumpSound = document.getElementById('jumpSound');
-jumpSound.volume = 0.4; // 40% do volume
+jumpSound.volume = 0.2; // Ajustado para 20% do volume
+/* INICIALIZAÇÃO DA MÚSICA DO MENU */
+const menuMusic = document.getElementById('menuMusic');
+menuMusic.volume = 0.4; // Ajustado para 50% do volume
+// Toca a música do menu ao iniciar/entrar no menu
+function playMenuMusic() {
+    menuMusic.play();
+}
+// Para de tocar a música do menu
+function stopMenuMusic() {
+    menuMusic.pause();
+    menuMusic.currentTime = 0; // Retorna ao início
+}
 /* INPUT */
 function action() {
     if (gameState === "menu") {
         if (menuOption === 0) {
             gameState = "game";
             resetGame();
-            backgroundMusic.play(); // Inicie a música quando o jogo começa
+            stopMenuMusic(); // Para a música do menu quando o jogo começa
+            backgroundMusic.play(); // Inicie a música do jogo
         }
         if (menuOption === 1) {
             waitingKey = true;
@@ -305,6 +319,8 @@ function loop(time) {
     draw();
     requestAnimationFrame(loop);
 }
+// Toca a música do menu ao inicializar
+playMenuMusic();
 requestAnimationFrame(loop);
 </script>
 </body>
