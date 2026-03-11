@@ -323,15 +323,16 @@ ctx.drawImage(clouds[cloud.frame],cloud.x,cloud.y,120,70);
 }
 
 /* PRÉDIOS */
+/* PRÉDIOS */
 
 if(gameState === "game"){
 
-ctx.drawImage(buildingTop,towerX,0,60,gapY);
+ctx.drawImage(buildingTop,towerX,0,100,gapY);
 ctx.drawImage(buildingBottom,towerX,gapY+gapSize,60,canvas.height-(gapY+gapSize));
 
 }
 
-/* PERSONAGEM (SEMPRE DESENHA) */
+/* PERSONAGEM */
 
 if(plane.velocity > 0){
 ctx.drawImage(fallImage,plane.x,plane.y,plane.width,plane.height);
