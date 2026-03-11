@@ -45,6 +45,14 @@ ctx.imageSmoothingEnabled = false;
 const sky = new Image();
 sky.src = "sky.png";
 
+/* PRÉDIOS */
+
+const buildingBottom = new Image();
+buildingBottom.src = "building1.png";
+
+const buildingTop = new Image();
+buildingTop.src = "building2.png";
+
 /* NUVENS */
 
 const clouds = [];
@@ -81,7 +89,7 @@ velocity:0
 let gravity = 0.25;
 let jump = -6;
 
-/* TORRES */
+/* TORRES (AGORA PRÉDIOS) */
 
 let towerX = canvas.width;
 let gapY = 200;
@@ -103,7 +111,7 @@ let jumpKey = "Space";
 let waitingKey = false;
 let paused = false;
 
-/* IMAGENS DO AVIÃO */
+/* IMAGENS DO PERSONAGEM */
 
 const frames = [];
 
@@ -248,7 +256,7 @@ if(plane.y >= canvas.height-plane.height){
 gameOver = true;
 }
 
-/* TORRES */
+/* MOVIMENTO DOS PRÉDIOS */
 
 towerX -= speed * delta;
 
@@ -269,7 +277,7 @@ passed = true;
 
 checkCollision();
 
-/* ANIMAÇÃO AVIÃO */
+/* ANIMAÇÃO DO PERSONAGEM */
 
 if(plane.velocity < 0){
 
@@ -310,14 +318,29 @@ function draw(){
 
 ctx.clearRect(0,0,canvas.width,canvas.height);
 
-/* SKY */
+/* CÉU */
 
-ctx.drawImage(sky,-20,0,canvas.width+40,canvas.height);
-/* TORRES */
+ctx.drawImage(sky,0,0,canvas.width,canvas.height);
 
-ctx.fillStyle="gray";
-ctx.fillRect(towerX,0,60,gapY);
-ctx.fillRect(towerX,gapY+gapSize,60,canvas.height);
+/* PRÉDIO DE CIMA */
+
+ctx.drawImage(
+buildingTop,
+towerX,
+0,
+60,
+gapY
+);
+
+/* PRÉDIO DE BAIXO */
+
+ctx.drawImage(
+buildingBottom,
+towerX,
+gapY + gapSize,
+60,
+canvas.height - (gapY + gapSize)
+);
 
 /* PERSONAGEM */
 
@@ -337,7 +360,7 @@ ctx.fillText("Score: "+score,10,30);
 
 }
 
-/* NUVENS NA FRENTE */
+/* NUVENS */
 
 for(let cloud of cloudList){
 
