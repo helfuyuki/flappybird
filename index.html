@@ -6,7 +6,6 @@
 <title>Cat Game</title>
 
 <style>
-
 body{
 margin:0;
 background:skyblue;
@@ -25,7 +24,6 @@ max-width:420px;
 height:auto;
 touch-action:none;
 }
-
 </style>
 </head>
 
@@ -45,13 +43,13 @@ ctx.imageSmoothingEnabled = false;
 const sky = new Image();
 sky.src = "sky.png";
 
-/* PRÉDIOS */
+/* CANOS */
 
-const buildingBottom = new Image();
-buildingBottom.src = "building1.png";
+const pipeBottom = new Image();
+pipeBottom.src = "cano1.png";
 
-const buildingTop = new Image();
-buildingTop.src = "building2.PNG";
+const pipeTop = new Image();
+pipeTop.src = "cano2.png";
 
 /* NUVENS */
 
@@ -87,7 +85,7 @@ velocity:0
 let gravity = 0.25;
 let jump = -6;
 
-/* PRÉDIOS */
+/* CANOS */
 
 let towerX = canvas.width;
 let gapSize = 200;
@@ -227,7 +225,7 @@ const ph = plane.height - margin*2;
 
 if(
 px + pw > towerX &&
-px < towerX + 60 &&
+px < towerX + 80 &&
 (
 py < gapY ||
 py + ph > gapY + gapSize
@@ -253,11 +251,11 @@ if(plane.y >= canvas.height-plane.height){
 gameOver = true;
 }
 
-/* MOVIMENTO PRÉDIOS */
+/* MOVIMENTO CANOS */
 
 towerX -= speed * delta;
 
-if(towerX < -60){
+if(towerX < -80){
 towerX = canvas.width;
 gapY = Math.random()*(canvas.height-gapSize);
 passed = false;
@@ -265,7 +263,7 @@ passed = false;
 
 /* SCORE */
 
-if(towerX + 60 < plane.x && !passed){
+if(towerX + 80 < plane.x && !passed){
 score++;
 passed = true;
 }
@@ -323,18 +321,21 @@ for(let cloud of cloudList){
 ctx.drawImage(clouds[cloud.frame],cloud.x,cloud.y,120,70);
 }
 
-/* PRÉDIOS */
-
-ctx.save();
-ctx.scale(1,-1);
-ctx.drawImage(buildingTop,towerX,-gapY,60,gapY);
-ctx.restore();
+/* CANOS */
 
 ctx.drawImage(
-buildingBottom,
+pipeTop,
+towerX,
+0,
+80,
+gapY
+);
+
+ctx.drawImage(
+pipeBottom,
 towerX,
 gapY+gapSize,
-60,
+80,
 canvas.height-(gapY+gapSize)
 );
 
