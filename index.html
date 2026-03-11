@@ -67,7 +67,7 @@ let jump = -6;
 /* CANOS */
 let towerX = canvas.width;
 let gapSize = 250; // Aumentar o tamanho do espaço
-let gapY = Math.random() * (canvas.height - gapSize - 100); // Reserve um espaço extra
+let gapY = Math.random() * (canvas.height - gapSize - 200); // Reserve um espaço extra
 let speed = 2;
 /* SCORE */
 let score = 0;
@@ -144,7 +144,7 @@ function resetGame() {
     plane.y = 300;
     plane.velocity = 0;
     towerX = canvas.width;
-    gapY = Math.random() * (canvas.height - gapSize - 100); // Reserve um espaço extra
+    gapY = Math.random() * (canvas.height - gapSize - 200); // Reserve um espaço extra
     score = 0;
     passed = false;
     gameOver = false;
@@ -156,13 +156,20 @@ function checkCollision() {
     const py = plane.y + margin;
     const pw = plane.width - margin * 2;
     const ph = plane.height - margin * 2;
+    // Ajuste para o hitbox do cano de cima
+    let topCanoHeight = gapY; // Altura do cano de cima
     if (
         px + pw > towerX &&
         px < towerX + 80 &&
-        (
-            py < gapY ||
-            py + ph > gapY + gapSize
-        )
+        (py < topCanoHeight) // Verifica se passou para cima
+    ) {
+        gameOver = true;
+    }
+    // Verificação para o cano de baixo
+    if (
+        px + pw > towerX &&
+        px < towerX + 80 &&
+        (py + ph > gapY + gapSize) // Verifica se passou por baixo
     ) {
         gameOver = true;
     }
@@ -181,7 +188,7 @@ function update(delta) {
     towerX -= speed * delta;
     if (towerX < -80) {
         towerX = canvas.width;
-        gapY = Math.random() * (canvas.height - gapSize - 100); // Reserve um espaço extra
+        gapY = Math.random() * (canvas.height - gapSize - 200); // Reserve um espaço extra
         passed = false;
     }
     /* SCORE */
