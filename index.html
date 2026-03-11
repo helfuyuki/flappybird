@@ -316,16 +316,22 @@ ctx.clearRect(0,0,canvas.width,canvas.height);
 
 ctx.drawImage(sky,0,0,canvas.width,canvas.height);
 
-/* PERSONAGEM + PRÉDIOS */
+/* NUVENS */
 
-if(gameState === "game"){
+for(let cloud of cloudList){
+ctx.drawImage(clouds[cloud.frame],cloud.x,cloud.y,120,70);
+}
 
 /* PRÉDIOS */
+
+if(gameState === "game"){
 
 ctx.drawImage(buildingTop,towerX,0,60,gapY);
 ctx.drawImage(buildingBottom,towerX,gapY+gapSize,60,canvas.height-(gapY+gapSize));
 
-/* PERSONAGEM */
+}
+
+/* PERSONAGEM (SEMPRE DESENHA) */
 
 if(plane.velocity > 0){
 ctx.drawImage(fallImage,plane.x,plane.y,plane.width,plane.height);
@@ -335,16 +341,12 @@ ctx.drawImage(frames[currentFrame],plane.x,plane.y,plane.width,plane.height);
 
 /* SCORE */
 
+if(gameState === "game"){
+
 ctx.fillStyle="black";
 ctx.font="24px Arial";
 ctx.fillText("Score: "+score,10,30);
 
-}
-
-/* NUVENS */
-
-for(let cloud of cloudList){
-ctx.drawImage(clouds[cloud.frame],cloud.x,cloud.y,120,70);
 }
 
 /* GAME OVER */
