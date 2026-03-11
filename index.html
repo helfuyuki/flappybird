@@ -7,7 +7,7 @@
 <style>
 body {
     margin: 0;
-    background: #191970; /* Mudando para uma cor diferente */
+    background: #191970; /* Color padrão do fundo */
     overflow: hidden;
     display: flex;
     justify-content: center;
@@ -155,21 +155,25 @@ document.addEventListener("keydown", function(e) {
         if (e.code === "Enter") {
             action();
         }
-        // Tocar a música do menu ao pressionar Enter ou ao mudar opções
-        playMenuMusic();
         return;
     }
     if (e.code === jumpKey) {
         action();
     }
 });
-/* MOUSE */
-canvas.addEventListener("mousedown", action);
-/* TOUCH */
+/* Adicionando evento de toque para iniciar a música do menu */
 canvas.addEventListener("touchstart", function(e) {
-    e.preventDefault();
-    action();
-}, { passive: false });
+    if (gameState === "menu") {
+        playMenuMusic(); // Tocar a música do menu no toque
+    }
+});
+/* MOUSE */
+canvas.addEventListener("mousedown", function() {
+    if (gameState === "menu") {
+        playMenuMusic(); // Tocar a música do menu no clique
+    }
+    action(); // Chama a ação geral
+});
 /* RESET */
 function resetGame() {
     plane.y = 300;
