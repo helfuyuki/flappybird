@@ -51,7 +51,7 @@ const buildingBottom = new Image();
 buildingBottom.src = "building1.png";
 
 const buildingTop = new Image();
-buildingTop.src = "building2.png";
+buildingTop.src = "building2.PNG";
 
 /* NUVENS */
 
@@ -325,9 +325,10 @@ ctx.drawImage(clouds[cloud.frame],cloud.x,cloud.y,120,70);
 
 /* PRÉDIOS */
 
-if(gameState === "game"){
-ctx.drawImage(buildingTop,towerX,0,60,gapY);
-ctx.drawImage(buildingBottom,towerX,gapY+gapSize,60,canvas.height-(gapY+gapSize));
+ctx.save();
+ctx.scale(1,-1);
+ctx.drawImage(buildingTop,towerX,-gapY,60,gapY);
+ctx.restore();
 }
 
 /* PERSONAGEM */
