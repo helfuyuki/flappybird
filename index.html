@@ -323,7 +323,7 @@ for(let cloud of cloudList){
 ctx.drawImage(clouds[cloud.frame],cloud.x,cloud.y,120,70);
 }
 
-/* CANOS */
+/* CANO DE CIMA */
 
 ctx.drawImage(
 pipeTop,
@@ -336,11 +336,13 @@ towerX,
 gapY
 );
 
+/* CANO DE BAIXO */
+
 ctx.drawImage(
 pipeBottom,
-0,40,
+0,80,
 pipeBottom.width,
-pipeBottom.height-40,
+pipeBottom.height-80,
 towerX,
 gapY+gapSize,
 80,
