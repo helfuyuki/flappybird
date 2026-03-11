@@ -7,7 +7,7 @@
 <style>
 body {
     margin: 0;
-    background: #191970; /* Mudando para verde claro */
+    background: #191970; /* Mudando para uma cor diferente */
     overflow: hidden;
     display: flex;
     justify-content: center;
@@ -107,7 +107,11 @@ const menuMusic = document.getElementById('menuMusic');
 menuMusic.volume = 0.5; // Ajustado para 50% do volume
 // Toca a música do menu ao inicializar
 function playMenuMusic() {
-    menuMusic.play();
+    if (gameState === "menu") {
+        menuMusic.play().catch(error => {
+            console.error("Erro ao tocar a música do menu:", error);
+        });
+    }
 }
 // Para de tocar a música do menu
 function stopMenuMusic() {
@@ -151,14 +155,12 @@ document.addEventListener("keydown", function(e) {
         if (e.code === "Enter") {
             action();
         }
+        // Tocar a música do menu ao pressionar Enter ou ao mudar opções
+        playMenuMusic();
         return;
     }
     if (e.code === jumpKey) {
         action();
-    }
-    // Tocar a música do menu ao pressionar qualquer tecla se o jogo estiver no menu
-    if (gameState === "menu") {
-        playMenuMusic();
     }
 });
 /* MOUSE */
