@@ -39,7 +39,6 @@ const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
 ctx.imageSmoothingEnabled = false;
-ctx.imageSmoothingQuality = "low";
 
 /* BACKGROUND */
 
@@ -137,6 +136,7 @@ if(gameState === "menu"){
 
 if(menuOption === 0){
 gameState = "game";
+resetGame();
 }
 
 if(menuOption === 1){
@@ -326,18 +326,20 @@ ctx.drawImage(clouds[cloud.frame],cloud.x,cloud.y,120,70);
 /* PRÉDIOS */
 
 if(gameState === "game"){
-
 ctx.drawImage(buildingTop,towerX,0,60,gapY);
 ctx.drawImage(buildingBottom,towerX,gapY+gapSize,60,canvas.height-(gapY+gapSize));
-
 }
 
 /* PERSONAGEM */
+
+if(gameState === "game" || gameOver){
 
 if(plane.velocity > 0){
 ctx.drawImage(fallImage,plane.x,plane.y,plane.width,plane.height);
 }else{
 ctx.drawImage(frames[currentFrame],plane.x,plane.y,plane.width,plane.height);
+}
+
 }
 
 /* SCORE */
@@ -388,19 +390,6 @@ ctx.fillText("Change Jump Key",110,300);
 if(waitingKey){
 ctx.fillText("Press a new key...",110,360);
 }
-
-}
-
-/* PAUSE */
-
-ctx.fillStyle="black";
-ctx.font="16px Arial";
-ctx.fillText("P to pause",canvas.width-110,20);
-
-if(paused){
-
-ctx.font="40px Arial";
-ctx.fillText("Paused",130,300);
 
 }
 
