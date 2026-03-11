@@ -6,6 +6,7 @@
 <title>Cat Game</title>
 
 <style>
+
 body{
 margin:0;
 background:skyblue;
@@ -24,6 +25,7 @@ max-width:420px;
 height:auto;
 touch-action:none;
 }
+
 </style>
 </head>
 
@@ -325,9 +327,9 @@ ctx.drawImage(clouds[cloud.frame],cloud.x,cloud.y,120,70);
 
 ctx.drawImage(
 pipeTop,
-0, 0,                // início do corte na imagem
-pipeTop.width, 
-pipeTop.height,      // tamanho do corte
+0,40,
+pipeTop.width,
+pipeTop.height-40,
 towerX,
 0,
 80,
@@ -336,13 +338,13 @@ gapY
 
 ctx.drawImage(
 pipeBottom,
-0, 0,
+0,40,
 pipeBottom.width,
-pipeBottom.height,
+pipeBottom.height-40,
 towerX,
-gapY + gapSize,
+gapY+gapSize,
 80,
-canvas.height - (gapY + gapSize)
+canvas.height-(gapY+gapSize)
 );
 
 /* PERSONAGEM */
@@ -405,19 +407,6 @@ ctx.fillText("Change Jump Key",110,300);
 if(waitingKey){
 ctx.fillText("Press a new key...",110,360);
 }
-
-}
-
-/* PAUSE */
-
-ctx.fillStyle="black";
-ctx.font="16px Arial";
-ctx.fillText("P to pause",canvas.width-110,20);
-
-if(paused){
-
-ctx.font="40px Arial";
-ctx.fillText("Paused",130,300);
 
 }
 
