@@ -40,6 +40,11 @@ const ctx = canvas.getContext("2d");
 
 ctx.imageSmoothingEnabled = false;
 
+/* BACKGROUND */
+
+const sky = new Image();
+sky.src = "sky.png";
+
 /* PERSONAGEM */
 
 let plane = {
@@ -75,7 +80,7 @@ let jumpKey = "Space";
 let waitingKey = false;
 let paused = false;
 
-/* IMAGENS DO AVIÃO */
+/* IMAGENS PERSONAGEM */
 
 const frames = [];
 
@@ -88,21 +93,7 @@ frames.push(img);
 const fallImage = new Image();
 fallImage.src = "caindo.png";
 
-/* BACKGROUND */
-
-const skyFrames = [];
-
-for(let i=1;i<=4;i++){
-let img = new Image();
-img.src = "sky"+i+".png";
-skyFrames.push(img);
-}
-
-let skyFrame = 0;
-let skyTimer = 0;
-let skySpeed = 17;
-
-/* ANIMAÇÃO DO AVIÃO */
+/* ANIMAÇÃO */
 
 let currentFrame = 0;
 let frameTimer = 0;
@@ -255,7 +246,7 @@ passed = true;
 
 checkCollision();
 
-/* ANIMAÇÃO AVIÃO */
+/* ANIMAÇÃO */
 
 if(plane.velocity < 0){
 
@@ -274,21 +265,6 @@ currentFrame = 0;
 
 }
 
-/* ANIMAÇÃO BACKGROUND */
-
-skyTimer += delta;
-
-if(skyTimer >= skySpeed){
-
-skyTimer = 0;
-skyFrame++;
-
-if(skyFrame >= skyFrames.length){
-skyFrame = 0;
-}
-
-}
-
 }
 
 /* DESENHO */
@@ -299,13 +275,7 @@ ctx.clearRect(0,0,canvas.width,canvas.height);
 
 /* BACKGROUND */
 
-ctx.drawImage(
-skyFrames[skyFrame],
-0,
-0,
-canvas.width,
-canvas.height
-);
+ctx.drawImage(sky,0,0,canvas.width,canvas.height);
 
 /* PERSONAGEM */
 
@@ -372,20 +342,6 @@ ctx.fillText("Press a new key...",110,360);
 
 }
 
-/* PAUSE */
-
-ctx.fillStyle = "black";
-ctx.font = "16px Arial";
-ctx.fillText("P to pause", canvas.width - 110, 20);
-
-if(paused){
-
-ctx.fillStyle = "black";
-ctx.font = "40px Arial";
-ctx.fillText("Paused",130,300);
-
-}
-
 }
 
 /* LOOP */
@@ -399,6 +355,20 @@ lastTime = time;
 
 update(delta);
 draw();
+
+/* TEXTO PAUSE */
+
+ctx.fillStyle = "black";
+ctx.font = "16px Arial";
+ctx.fillText("P to pause", canvas.width - 110, 20);
+
+if(paused){
+
+ctx.fillStyle = "black";
+ctx.font = "40px Arial";
+ctx.fillText("Paused",130,300);
+
+}
 
 requestAnimationFrame(loop);
 
