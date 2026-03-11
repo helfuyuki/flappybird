@@ -39,12 +39,10 @@ const ctx = canvas.getContext("2d");
 ctx.imageSmoothingEnabled = false;
 
 /* BACKGROUND */
-
 const sky = new Image();
 sky.src = "sky.png";
 
 /* CANOS */
-
 const pipeBottom = new Image();
 pipeBottom.src = "cano1.png";
 
@@ -52,53 +50,46 @@ const pipeTop = new Image();
 pipeTop.src = "cano2.png";
 
 /* NUVENS */
-
 const clouds = [];
-
 for(let i=1;i<=3;i++){
-let img = new Image();
-img.src = "cloud"+i+".png";
-clouds.push(img);
+  let img = new Image();
+  img.src = "cloud"+i+".png";
+  clouds.push(img);
 }
 
 let cloudList = [];
-
 for(let i=0;i<8;i++){
-cloudList.push({
-x: Math.random()*canvas.width,
-y: Math.random()*300,
-speed: 1 + Math.random()*0.6,
-frame: Math.floor(Math.random()*clouds.length)
-});
+  cloudList.push({
+    x: Math.random()*canvas.width,
+    y: Math.random()*300,
+    speed: 1 + Math.random()*0.6,
+    frame: Math.floor(Math.random()*clouds.length)
+  });
 }
 
 /* PERSONAGEM */
-
 let plane = {
-x:80,
-y:300,
-width:80,
-height:80,
-velocity:0
+  x:80,
+  y:300,
+  width:80,
+  height:80,
+  velocity:0
 };
 
 let gravity = 0.25;
 let jump = -6;
 
 /* CANOS */
-
 let towerX = canvas.width;
-let gapSize = 200;
+let gapSize = 180; // ajustei para manter o espaço
 let gapY = Math.random()*(canvas.height-gapSize);
 let speed = 2;
 
 /* SCORE */
-
 let score = 0;
 let passed = false;
 
 /* ESTADO */
-
 let gameState = "menu";
 let gameOver = false;
 
@@ -108,329 +99,253 @@ let waitingKey = false;
 let paused = false;
 
 /* IMAGENS PERSONAGEM */
-
 const frames = [];
-
 for(let i=1;i<=5;i++){
-let img = new Image();
-img.src = "frame"+i+".png";
-frames.push(img);
+  let img = new Image();
+  img.src = "frame"+i+".png";
+  frames.push(img);
 }
 
 const fallImage = new Image();
 fallImage.src = "caindo.png";
 
 /* ANIMAÇÃO */
-
 let currentFrame = 0;
 let frameTimer = 0;
 let frameSpeed = 5;
 
 /* INPUT */
-
 function action(){
+  if(gameState === "menu"){
+    if(menuOption === 0){
+      gameState = "game";
+      resetGame();
+    }
+    if(menuOption === 1){
+      waitingKey = true;
+    }
+    return;
+  }
 
-if(gameState === "menu"){
+  if(gameOver){
+    resetGame();
+    return;
+  }
 
-if(menuOption === 0){
-gameState = "game";
-resetGame();
-}
-
-if(menuOption === 1){
-waitingKey = true;
-}
-
-return;
-}
-
-if(gameOver){
-resetGame();
-return;
-}
-
-plane.velocity = jump;
-
+  plane.velocity = jump;
 }
 
 /* TECLADO */
-
 document.addEventListener("keydown",function(e){
+  if(e.code === "KeyP" && gameState === "game" && !gameOver){
+    paused = !paused;
+  }
 
-if(e.code === "KeyP" && gameState === "game" && !gameOver){
-paused = !paused;
-}
+  if(gameState === "menu"){
+    if(waitingKey){
+      jumpKey = e.code;
+      waitingKey = false;
+      return;
+    }
 
-if(gameState === "menu"){
+    if(e.code === "ArrowUp") menuOption = 0;
+    if(e.code === "ArrowDown") menuOption = 1;
 
-if(waitingKey){
-jumpKey = e.code;
-waitingKey = false;
-return;
-}
+    if(e.code === "Enter"){
+      action();
+    }
+    return;
+  }
 
-if(e.code === "ArrowUp") menuOption = 0;
-if(e.code === "ArrowDown") menuOption = 1;
-
-if(e.code === "Enter"){
-action();
-}
-
-return;
-}
-
-if(e.code === jumpKey){
-action();
-}
-
+  if(e.code === jumpKey){
+    action();
+  }
 });
 
 /* MOUSE */
-
 canvas.addEventListener("mousedown",action);
 
 /* TOUCH */
-
 canvas.addEventListener("touchstart",function(e){
-e.preventDefault();
-action();
+  e.preventDefault();
+  action();
 },{passive:false});
 
 /* RESET */
-
 function resetGame(){
+  plane.y = 300;
+  plane.velocity = 0;
 
-plane.y = 300;
-plane.velocity = 0;
+  towerX = canvas.width;
+  gapY = Math.random()*(canvas.height-gapSize);
 
-towerX = canvas.width;
-gapY = Math.random()*(canvas.height-gapSize);
-
-score = 0;
-passed = false;
-gameOver = false;
-
+  score = 0;
+  passed = false;
+  gameOver = false;
 }
 
 /* COLISÃO */
-
 function checkCollision(){
+  const margin = 12;
+  const px = plane.x + margin;
+  const py = plane.y + margin;
+  const pw = plane.width - margin*2;
+  const ph = plane.height - margin*2;
 
-const margin = 12;
-
-const px = plane.x + margin;
-const py = plane.y + margin;
-const pw = plane.width - margin*2;
-const ph = plane.height - margin*2;
-
-if(
-px + pw > towerX &&
-px < towerX + 80 &&
-(
-py < gapY ||
-py + ph > gapY + gapSize
-)
-){
-gameOver = true;
-}
-
+  if(
+    px + pw > towerX &&
+    px < towerX + 80 &&
+    (
+      py < gapY ||
+      py + ph > gapY + gapSize
+    )
+  ){
+    gameOver = true;
+  }
 }
 
 /* UPDATE */
-
 function update(delta){
+  if(gameState !== "game") return;
+  if(gameOver) return;
+  if(paused) return;
 
-if(gameState !== "game") return;
-if(gameOver) return;
-if(paused) return;
+  plane.velocity += gravity * delta;
+  plane.y += plane.velocity * delta;
 
-plane.velocity += gravity * delta;
-plane.y += plane.velocity * delta;
+  if(plane.y >= canvas.height-plane.height){
+    gameOver = true;
+  }
 
-if(plane.y >= canvas.height-plane.height){
-gameOver = true;
-}
+  /* MOVIMENTO CANOS */
+  towerX -= speed * delta;
 
-/* MOVIMENTO CANOS */
+  if(towerX < -80){
+    towerX = canvas.width;
+    gapY = Math.random()*(canvas.height-gapSize);
+    passed = false;
+  }
 
-towerX -= speed * delta;
+  /* SCORE */
+  if(towerX + 80 < plane.x && !passed){
+    score++;
+    passed = true;
+  }
 
-if(towerX < -80){
-towerX = canvas.width;
-gapY = Math.random()*(canvas.height-gapSize);
-passed = false;
-}
+  checkCollision();
 
-/* SCORE */
+  /* ANIMAÇÃO */
+  if(plane.velocity < 0){
+    frameTimer += delta;
+    if(frameTimer >= frameSpeed){
+      frameTimer = 0;
+      currentFrame++;
+      if(currentFrame >= frames.length){
+        currentFrame = 0;
+      }
+    }
+  }
 
-if(towerX + 80 < plane.x && !passed){
-score++;
-passed = true;
-}
-
-checkCollision();
-
-/* ANIMAÇÃO */
-
-if(plane.velocity < 0){
-
-frameTimer += delta;
-
-if(frameTimer >= frameSpeed){
-
-frameTimer = 0;
-currentFrame++;
-
-if(currentFrame >= frames.length){
-currentFrame = 0;
-}
-
-}
-
-}
-
-/* NUVENS */
-
-for(let cloud of cloudList){
-
-cloud.x -= cloud.speed * delta;
-
-if(cloud.x < -150){
-cloud.x = canvas.width + Math.random()*200;
-cloud.y = Math.random()*300;
-cloud.frame = Math.floor(Math.random()*clouds.length);
-}
-
-}
-
+  /* NUVENS */
+  for(let cloud of cloudList){
+    cloud.x -= cloud.speed * delta;
+    if(cloud.x < -150){
+      cloud.x = canvas.width + Math.random()*200;
+      cloud.y = Math.random()*300;
+      cloud.frame = Math.floor(Math.random()*clouds.length);
+    }
+  }
 }
 
 /* DESENHO */
-
 function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
 
-ctx.clearRect(0,0,canvas.width,canvas.height);
+  /* CÉU */
+  ctx.drawImage(sky,0,0,canvas.width,canvas.height);
 
-/* CÉU */
+  /* NUVENS */
+  for(let cloud of cloudList){
+    ctx.drawImage(clouds[cloud.frame],cloud.x,cloud.y,120,70);
+  }
 
-ctx.drawImage(sky,0,0,canvas.width,canvas.height);
+  /* CANOS */
+  let stretchFactor = 1.3; // 30% maior
 
-/* NUVENS */
+  let topHeight = gapY * stretchFactor;
+  let bottomHeight = (canvas.height - (gapY + gapSize)) * stretchFactor;
+  bottomHeight = Math.min(bottomHeight, canvas.height - (gapY + gapSize));
 
-for(let cloud of cloudList){
-ctx.drawImage(clouds[cloud.frame],cloud.x,cloud.y,120,70);
-}
+  ctx.drawImage(pipeTop, towerX, 0, 80, topHeight);
+  ctx.drawImage(pipeBottom, towerX, gapY + gapSize, 80, bottomHeight);
 
-/* CANOS */
+  /* PERSONAGEM */
+  if(gameState === "game" || gameOver){
+    if(plane.velocity > 0){
+      ctx.drawImage(fallImage,plane.x,plane.y,plane.width,plane.height);
+    }else{
+      ctx.drawImage(frames[currentFrame],plane.x,plane.y,plane.width,plane.height);
+    }
+  }
 
-ctx.drawImage(
-pipeTop,
-towerX,
-0,
-80,
-gapY
-);
+  /* SCORE */
+  if(gameState === "game"){
+    ctx.fillStyle="black";
+    ctx.font="24px Arial";
+    ctx.fillText("Score: "+score,10,30);
+  }
 
-ctx.drawImage(
-pipeBottom,
-towerX,
-gapY+gapSize,
-80,
-canvas.height-(gapY+gapSize)
-);
+  /* GAME OVER */
+  if(gameOver){
+    ctx.fillStyle="black";
+    ctx.font="40px Arial";
+    ctx.fillText("Game Over",110,300);
+    ctx.font="20px Arial";
+    ctx.fillText("Press Jump to Restart",90,340);
+  }
 
-/* PERSONAGEM */
+  /* MENU */
+  if(gameState === "menu"){
+    ctx.fillStyle="black";
+    ctx.font="30px Arial";
+    ctx.fillText("Cat Sky Game",100,150);
+    ctx.font="20px Arial";
+    if(menuOption === 0){
+      ctx.fillText("> Start Game",130,250);
+    }else{
+      ctx.fillText("Start Game",130,250);
+    }
+    if(menuOption === 1){
+      ctx.fillText("> Change Jump Key",110,300);
+    }else{
+      ctx.fillText("Change Jump Key",110,300);
+    }
+    if(waitingKey){
+      ctx.fillText("Press a new key...",110,360);
+    }
+  }
 
-if(gameState === "game" || gameOver){
-
-if(plane.velocity > 0){
-ctx.drawImage(fallImage,plane.x,plane.y,plane.width,plane.height);
-}else{
-ctx.drawImage(frames[currentFrame],plane.x,plane.y,plane.width,plane.height);
-}
-
-}
-
-/* SCORE */
-
-if(gameState === "game"){
-
-ctx.fillStyle="black";
-ctx.font="24px Arial";
-ctx.fillText("Score: "+score,10,30);
-
-}
-
-/* GAME OVER */
-
-if(gameOver){
-
-ctx.fillStyle="black";
-ctx.font="40px Arial";
-ctx.fillText("Game Over",110,300);
-
-ctx.font="20px Arial";
-ctx.fillText("Press Jump to Restart",90,340);
-
-}
-
-/* MENU */
-
-if(gameState === "menu"){
-
-ctx.fillStyle="black";
-ctx.font="30px Arial";
-ctx.fillText("Cat Sky Game",100,150);
-
-ctx.font="20px Arial";
-
-if(menuOption === 0){
-ctx.fillText("> Start Game",130,250);
-}else{
-ctx.fillText("Start Game",130,250);
-}
-
-if(menuOption === 1){
-ctx.fillText("> Change Jump Key",110,300);
-}else{
-ctx.fillText("Change Jump Key",110,300);
-}
-
-if(waitingKey){
-ctx.fillText("Press a new key...",110,360);
-}
-
-}
-
-/* PAUSE */
-
-ctx.fillStyle="black";
-ctx.font="16px Arial";
-ctx.fillText("P to pause",canvas.width-110,20);
-
-if(paused){
-
-ctx.font="40px Arial";
-ctx.fillText("Paused",130,300);
-
-}
-
+  /* PAUSE */
+  ctx.fillStyle="black";
+  ctx.font="16px Arial";
+  ctx.fillText("P to pause",canvas.width-110,20);
+  if(paused){
+    ctx.font="40px Arial";
+    ctx.fillText("Paused",130,300);
+  }
 }
 
 /* LOOP */
-
 let lastTime = 0;
 
 function loop(time){
+  let delta = (time-lastTime)/16.67;
+  lastTime = time;
 
-let delta = (time-lastTime)/16.67;
-lastTime = time;
+  update(delta);
+  draw();
 
-update(delta);
-draw();
-
-requestAnimationFrame(loop);
-
+  requestAnimationFrame(loop);
 }
 
 requestAnimationFrame(loop);
