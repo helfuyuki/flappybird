@@ -26,6 +26,8 @@ canvas {
 </head>
 <body>
 <canvas id="game" width="400" height="800"></canvas>
+<!-- Adicione a música como elemento de áudio -->
+<audio id="backgroundMusic" src="playlist.mp3" loop></audio>
 <script>
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
@@ -92,12 +94,16 @@ fallImage.src = "caindo.png";
 let currentFrame = 0;
 let frameTimer = 0;
 let frameSpeed = 5;
+/* INICIALIZAÇÃO DA MÚSICA */
+const backgroundMusic = document.getElementById('backgroundMusic');
+backgroundMusic.volume = 0.6; // 60% do volume
 /* INPUT */
 function action() {
     if (gameState === "menu") {
         if (menuOption === 0) {
             gameState = "game";
             resetGame();
+            backgroundMusic.play(); // Inicie a música quando o jogo começa
         }
         if (menuOption === 1) {
             waitingKey = true;
