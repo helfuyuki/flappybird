@@ -104,8 +104,8 @@ const jumpSound = document.getElementById('jumpSound');
 jumpSound.volume = 0.2; // Ajustado para 20% do volume
 /* INICIALIZAÇÃO DA MÚSICA DO MENU */
 const menuMusic = document.getElementById('menuMusic');
-menuMusic.volume = 0.4; // Ajustado para 50% do volume
-// Toca a música do menu ao iniciar/entrar no menu
+menuMusic.volume = 0.5; // Ajustado para 50% do volume
+// Toca a música do menu ao inicializar
 function playMenuMusic() {
     menuMusic.play();
 }
@@ -155,6 +155,10 @@ document.addEventListener("keydown", function(e) {
     }
     if (e.code === jumpKey) {
         action();
+    }
+    // Tocar a música do menu ao pressionar qualquer tecla se o jogo estiver no menu
+    if (gameState === "menu") {
+        playMenuMusic();
     }
 });
 /* MOUSE */
@@ -319,8 +323,8 @@ function loop(time) {
     draw();
     requestAnimationFrame(loop);
 }
-// Toca a música do menu ao inicializar
-playMenuMusic();
+/* Toca a música do menu ao iniciar */
+playMenuMusic(); // Inicialmente toca a música do menu
 requestAnimationFrame(loop);
 </script>
 </body>
