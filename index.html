@@ -39,6 +39,7 @@ const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
 ctx.imageSmoothingEnabled = false;
+ctx.imageSmoothingQuality = "low";
 
 /* BACKGROUND */
 
@@ -90,8 +91,8 @@ let jump = -6;
 /* PRÉDIOS */
 
 let towerX = canvas.width;
-let gapY = 200;
 let gapSize = 200;
+let gapY = Math.random()*(canvas.height-gapSize);
 let speed = 2;
 
 /* SCORE */
@@ -323,11 +324,10 @@ ctx.drawImage(clouds[cloud.frame],cloud.x,cloud.y,120,70);
 }
 
 /* PRÉDIOS */
-/* PRÉDIOS */
 
 if(gameState === "game"){
 
-ctx.drawImage(buildingTop,towerX,0,100,gapY);
+ctx.drawImage(buildingTop,towerX,0,60,gapY);
 ctx.drawImage(buildingBottom,towerX,gapY+gapSize,60,canvas.height-(gapY+gapSize));
 
 }
