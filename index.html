@@ -45,6 +45,29 @@ ctx.imageSmoothingEnabled = false;
 const sky = new Image();
 sky.src = "sky.png";
 
+/* NUVENS */
+
+const clouds = [];
+
+for(let i=1;i<=3;i++){
+let img = new Image();
+img.src = "cloud"+i+".png";
+clouds.push(img);
+}
+
+let cloudList = [];
+
+for(let i=0;i<5;i++){
+
+cloudList.push({
+x: Math.random()*canvas.width,
+y: Math.random()*300,
+speed: 0.3 + Math.random()*0.4,
+frame: Math.floor(Math.random()*clouds.length)
+});
+
+}
+
 /* PERSONAGEM */
 
 let plane = {
@@ -70,7 +93,7 @@ let speed = 2;
 let score = 0;
 let passed = false;
 
-/* ESTADO DO JOGO */
+/* ESTADO */
 
 let gameState = "menu";
 let gameOver = false;
@@ -80,7 +103,7 @@ let jumpKey = "Space";
 let waitingKey = false;
 let paused = false;
 
-/* IMAGENS PERSONAGEM */
+/* PERSONAGEM FRAMES */
 
 const frames = [];
 
@@ -216,10 +239,10 @@ if(gameState !== "game") return;
 if(gameOver) return;
 if(paused) return;
 
+/* GRAVIDADE */
+
 plane.velocity += gravity * delta;
 plane.y += plane.velocity * delta;
-
-/* CHÃO */
 
 if(plane.y >= canvas.height-plane.height){
 gameOver = true;
@@ -246,7 +269,7 @@ passed = true;
 
 checkCollision();
 
-/* ANIMAÇÃO */
+/* ANIMAÇÃO AVIÃO */
 
 if(plane.velocity < 0){
 
@@ -265,19 +288,47 @@ currentFrame = 0;
 
 }
 
+/* MOVIMENTO DAS NUVENS */
+
+for(let cloud of cloudList){
+
+cloud.x -= cloud.speed * delta;
+
+if(cloud.x < -150){
+cloud.x = canvas.width + Math.random()*200;
+cloud.y = Math.random()*300;
+cloud.frame = Math.floor(Math.random()*clouds.length);
 }
 
-/* DESENHO */
+}
+
+}
+
+/* DRAW */
 
 function draw(){
 
 ctx.clearRect(0,0,canvas.width,canvas.height);
 
-/* BACKGROUND */
+/* SKY */
 
 ctx.drawImage(sky,0,0,canvas.width,canvas.height);
 
-/* PERSONAGEM */
+/* CLOUDS */
+
+for(let cloud of cloudList){
+
+ctx.drawImage(
+clouds[cloud.frame],
+cloud.x,
+cloud.y,
+120,
+70
+);
+
+}
+
+/* JOGO */
 
 if(gameState === "game"){
 
@@ -356,16 +407,13 @@ lastTime = time;
 update(delta);
 draw();
 
-/* TEXTO PAUSE */
-
-ctx.fillStyle = "black";
-ctx.font = "16px Arial";
-ctx.fillText("P to pause", canvas.width - 110, 20);
+ctx.fillStyle="black";
+ctx.font="16px Arial";
+ctx.fillText("P to pause",canvas.width-110,20);
 
 if(paused){
 
-ctx.fillStyle = "black";
-ctx.font = "40px Arial";
+ctx.font="40px Arial";
 ctx.fillText("Paused",130,300);
 
 }
