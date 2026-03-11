@@ -26,8 +26,9 @@ canvas {
 </head>
 <body>
 <canvas id="game" width="400" height="800"></canvas>
-<!-- Adicione a música como elemento de áudio -->
+<!-- Adicionando Música e Som do Pulo -->
 <audio id="backgroundMusic" src="playlist.mp3" loop></audio>
+<audio id="jumpSound" src="jump.mp3"></audio>
 <script>
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
@@ -97,6 +98,9 @@ let frameSpeed = 5;
 /* INICIALIZAÇÃO DA MÚSICA */
 const backgroundMusic = document.getElementById('backgroundMusic');
 backgroundMusic.volume = 0.6; // 60% do volume
+/* INICIALIZAÇÃO DO SOM DO PULO */
+const jumpSound = document.getElementById('jumpSound');
+jumpSound.volume = 0.4; // 40% do volume
 /* INPUT */
 function action() {
     if (gameState === "menu") {
@@ -115,6 +119,7 @@ function action() {
         return;
     }
     plane.velocity = jump;
+    jumpSound.play(); // Tocar o som do pulo
 }
 /* TECLADO */
 document.addEventListener("keydown", function(e) {
