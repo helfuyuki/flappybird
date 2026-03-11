@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Plane Game</title>
+<title>Cat Game</title>
 
 <style>
 
@@ -66,14 +66,12 @@ clouds.push(img);
 let cloudList = [];
 
 for(let i=0;i<8;i++){
-
 cloudList.push({
 x: Math.random()*canvas.width,
 y: Math.random()*300,
-speed: 0.8 + Math.random()*0.6,
+speed: 1 + Math.random()*0.6,
 frame: Math.floor(Math.random()*clouds.length)
 });
-
 }
 
 /* PERSONAGEM */
@@ -89,7 +87,7 @@ velocity:0
 let gravity = 0.25;
 let jump = -6;
 
-/* TORRES (AGORA PRÉDIOS) */
+/* PRÉDIOS */
 
 let towerX = canvas.width;
 let gapY = 200;
@@ -101,7 +99,7 @@ let speed = 2;
 let score = 0;
 let passed = false;
 
-/* ESTADO DO JOGO */
+/* ESTADO */
 
 let gameState = "menu";
 let gameOver = false;
@@ -111,7 +109,7 @@ let jumpKey = "Space";
 let waitingKey = false;
 let paused = false;
 
-/* IMAGENS DO PERSONAGEM */
+/* IMAGENS PERSONAGEM */
 
 const frames = [];
 
@@ -247,8 +245,6 @@ if(gameState !== "game") return;
 if(gameOver) return;
 if(paused) return;
 
-/* GRAVIDADE */
-
 plane.velocity += gravity * delta;
 plane.y += plane.velocity * delta;
 
@@ -256,7 +252,7 @@ if(plane.y >= canvas.height-plane.height){
 gameOver = true;
 }
 
-/* MOVIMENTO DOS PRÉDIOS */
+/* MOVIMENTO PRÉDIOS */
 
 towerX -= speed * delta;
 
@@ -273,11 +269,9 @@ score++;
 passed = true;
 }
 
-/* COLISÃO */
-
 checkCollision();
 
-/* ANIMAÇÃO DO PERSONAGEM */
+/* ANIMAÇÃO */
 
 if(plane.velocity < 0){
 
@@ -296,7 +290,7 @@ currentFrame = 0;
 
 }
 
-/* MOVIMENTO DAS NUVENS */
+/* NUVENS */
 
 for(let cloud of cloudList){
 
@@ -322,29 +316,16 @@ ctx.clearRect(0,0,canvas.width,canvas.height);
 
 ctx.drawImage(sky,0,0,canvas.width,canvas.height);
 
-/* PRÉDIO DE CIMA */
-
-ctx.drawImage(
-buildingTop,
-towerX,
-0,
-60,
-gapY
-);
-
-/* PRÉDIO DE BAIXO */
-
-ctx.drawImage(
-buildingBottom,
-towerX,
-gapY + gapSize,
-60,
-canvas.height - (gapY + gapSize)
-);
-
-/* PERSONAGEM */
+/* PERSONAGEM + PRÉDIOS */
 
 if(gameState === "game"){
+
+/* PRÉDIOS */
+
+ctx.drawImage(buildingTop,towerX,0,60,gapY);
+ctx.drawImage(buildingBottom,towerX,gapY+gapSize,60,canvas.height-(gapY+gapSize));
+
+/* PERSONAGEM */
 
 if(plane.velocity > 0){
 ctx.drawImage(fallImage,plane.x,plane.y,plane.width,plane.height);
@@ -363,15 +344,7 @@ ctx.fillText("Score: "+score,10,30);
 /* NUVENS */
 
 for(let cloud of cloudList){
-
-ctx.drawImage(
-clouds[cloud.frame],
-cloud.x,
-cloud.y,
-120,
-70
-);
-
+ctx.drawImage(clouds[cloud.frame],cloud.x,cloud.y,120,70);
 }
 
 /* GAME OVER */
@@ -393,7 +366,7 @@ if(gameState === "menu"){
 
 ctx.fillStyle="black";
 ctx.font="30px Arial";
-ctx.fillText("Plane Game",120,150);
+ctx.fillText("Cat Sky Game",100,150);
 
 ctx.font="20px Arial";
 
