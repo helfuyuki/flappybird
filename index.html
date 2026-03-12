@@ -39,60 +39,41 @@ touch-action:none;
 
 <script>
 
-const canvas = document.getElementById("game")
-const ctx = canvas.getContext("2d")
-ctx.imageSmoothingEnabled = false
+const canvas=document.getElementById("game")
+const ctx=canvas.getContext("2d")
+
+/* ÁUDIOS */
+
+const backgroundMusic=document.getElementById("backgroundMusic")
+backgroundMusic.volume=0.6
+
+const jumpSound=document.getElementById("jumpSound")
+jumpSound.volume=0.2
+
+const menuMusic=document.getElementById("menuMusic")
+menuMusic.volume=0.5
 
 /* BACKGROUND */
 
-const sky = new Image()
-sky.src = "sky.png"
+const sky=new Image()
+sky.src="sky.png"
 
 /* CANOS */
 
-const pipeBottom = new Image()
-pipeBottom.src = "cano1.png"
+const pipeBottom=new Image()
+pipeBottom.src="cano1.png"
 
-const pipeTop = new Image()
-pipeTop.src = "cano2.png"
-
-/* NUVENS */
-
-const clouds = []
-
-for(let i=1;i<=3;i++){
-
-let img = new Image()
-img.src = "cloud"+i+".png"
-clouds.push(img)
-
-}
-
-let cloudList = []
-
-for(let i=0;i<8;i++){
-
-cloudList.push({
-
-x:Math.random()*canvas.width,
-y:Math.random()*300,
-speed:1+Math.random()*0.6,
-frame:Math.floor(Math.random()*clouds.length)
-
-})
-
-}
+const pipeTop=new Image()
+pipeTop.src="cano2.png"
 
 /* PERSONAGEM */
 
 let plane={
-
 x:80,
 y:300,
 width:80,
 height:80,
 velocity:0
-
 }
 
 let gravity=0.25
@@ -114,93 +95,6 @@ let passed=false
 
 let gameState="menu"
 let gameOver=false
-let menuOption=0
-let jumpKey="Space"
-let waitingKey=false
-let paused=false
-
-/* IMAGENS PERSONAGEM */
-
-const frames=[]
-
-for(let i=1;i<=5;i++){
-
-let img=new Image()
-img.src="frame"+i+".png"
-frames.push(img)
-
-}
-
-const fallImage=new Image()
-fallImage.src="caindo.png"
-
-/* ANIMAÇÃO */
-
-let currentFrame=0
-let frameTimer=0
-let frameSpeed=5
-
-/* ÁUDIOS */
-
-const backgroundMusic=document.getElementById("backgroundMusic")
-backgroundMusic.volume=0.6
-
-const jumpSound=document.getElementById("jumpSound")
-jumpSound.volume=0.2
-
-const menuMusic=document.getElementById("menuMusic")
-menuMusic.volume=0.5
-
-let audioUnlocked=false
-
-function unlockAudio(){
-
-if(audioUnlocked) return
-
-backgroundMusic.play().then(()=>{
-
-backgroundMusic.pause()
-backgroundMusic.currentTime=0
-
-})
-
-menuMusic.play().then(()=>{
-
-menuMusic.pause()
-menuMusic.currentTime=0
-
-})
-
-jumpSound.play().then(()=>{
-
-jumpSound.pause()
-jumpSound.currentTime=0
-
-})
-
-audioUnlocked=true
-
-}
-
-/* MENU MUSIC */
-
-function playMenuMusic(){
-
-if(gameState==="menu"){
-
-menuMusic.currentTime=0
-menuMusic.play().catch(()=>{})
-
-}
-
-}
-
-function stopMenuMusic(){
-
-menuMusic.pause()
-menuMusic.currentTime=0
-
-}
 
 /* INPUT */
 
@@ -208,23 +102,13 @@ function action(){
 
 if(gameState==="menu"){
 
-if(menuOption===0){
-
 gameState="game"
-resetGame()
+menuMusic.pause()
 
-stopMenuMusic()
-
+backgroundMusic.currentTime=0
 backgroundMusic.play().catch(()=>{})
 
-}
-
-if(menuOption===1){
-
-waitingKey=true
-
-}
-
+resetGame()
 return
 
 }
@@ -243,76 +127,39 @@ jumpSound.play().catch(()=>{})
 
 }
 
-/* TECLADO */
-
-document.addEventListener("keydown",function(e){
-
-if(e.code==="KeyP" && gameState==="game" && !gameOver){
-
-paused=!paused
-
-}
-
-if(gameState==="menu"){
-
-if(waitingKey){
-
-jumpKey=e.code
-waitingKey=false
-return
-
-}
-
-if(e.code==="ArrowUp") menuOption=0
-if(e.code==="ArrowDown") menuOption=1
-
-if(e.code==="Enter"){
-
-action()
-
-}
-
-return
-
-}
-
-if(e.code===jumpKey){
-
-action()
-
-}
-
-})
-
-/* TOUCH */
-
-canvas.addEventListener("touchstart",function(){
-
-unlockAudio()
-
-if(gameState==="menu"){
-
-playMenuMusic()
-
-}
-
-action()
-
-})
-
-/* MOUSE */
+/* CONTROLES */
 
 canvas.addEventListener("mousedown",function(){
 
-unlockAudio()
-
 if(gameState==="menu"){
 
-playMenuMusic()
+backgroundMusic.play().catch(()=>{})
 
 }
 
 action()
+
+})
+
+canvas.addEventListener("touchstart",function(){
+
+if(gameState==="menu"){
+
+backgroundMusic.play().catch(()=>{})
+
+}
+
+action()
+
+})
+
+document.addEventListener("keydown",function(e){
+
+if(e.code==="Space"){
+
+action()
+
+}
 
 })
 
@@ -336,32 +183,11 @@ gameOver=false
 
 function checkCollision(){
 
-const margin=12
-
-const px=plane.x+margin
-const py=plane.y+margin
-const pw=plane.width-margin*2
-const ph=plane.height-margin*2
-
-let topCanoHeight=gapY
-
 if(
 
-px+pw>towerX &&
-px<towerX+80 &&
-(py<topCanoHeight)
-
-){
-
-gameOver=true
-
-}
-
-if(
-
-px+pw>towerX &&
-px<towerX+80 &&
-(py+ph>gapY+gapSize)
+plane.x+plane.width>towerX &&
+plane.x<towerX+80 &&
+(plane.y<gapY || plane.y+plane.height>gapY+gapSize)
 
 ){
 
@@ -373,14 +199,13 @@ gameOver=true
 
 /* UPDATE */
 
-function update(delta){
+function update(){
 
 if(gameState!=="game") return
 if(gameOver) return
-if(paused) return
 
-plane.velocity+=gravity*delta
-plane.y+=plane.velocity*delta
+plane.velocity+=gravity
+plane.y+=plane.velocity
 
 if(plane.y>=canvas.height-plane.height){
 
@@ -388,7 +213,7 @@ gameOver=true
 
 }
 
-towerX-=speed*delta
+towerX-=speed
 
 if(towerX<-80){
 
@@ -407,39 +232,6 @@ passed=true
 
 checkCollision()
 
-if(plane.velocity<0){
-
-frameTimer+=delta
-
-if(frameTimer>=frameSpeed){
-
-frameTimer=0
-currentFrame++
-
-if(currentFrame>=frames.length){
-
-currentFrame=0
-
-}
-
-}
-
-}
-
-for(let cloud of cloudList){
-
-cloud.x-=cloud.speed*delta
-
-if(cloud.x<-150){
-
-cloud.x=canvas.width+Math.random()*200
-cloud.y=Math.random()*300
-cloud.frame=Math.floor(Math.random()*clouds.length)
-
-}
-
-}
-
 }
 
 /* DRAW */
@@ -450,99 +242,27 @@ ctx.clearRect(0,0,canvas.width,canvas.height)
 
 ctx.drawImage(sky,0,0,canvas.width,canvas.height)
 
-for(let cloud of cloudList){
+ctx.drawImage(pipeTop,towerX,0,80,gapY)
+ctx.drawImage(pipeBottom,towerX,gapY+gapSize,80,canvas.height)
 
-ctx.drawImage(clouds[cloud.frame],cloud.x,cloud.y,120,70)
-
-}
-
-let stretchFactor=1.3
-
-let topHeight=gapY*stretchFactor
-let bottomHeight=(canvas.height-(gapY+gapSize))*stretchFactor
-
-bottomHeight=Math.min(bottomHeight,canvas.height-(gapY+gapSize))
-
-ctx.drawImage(pipeTop,towerX,0,80,topHeight)
-ctx.drawImage(pipeBottom,towerX,gapY+gapSize,80,bottomHeight)
-
-if(gameState==="game"||gameOver){
-
-if(plane.velocity>0){
-
-ctx.drawImage(fallImage,plane.x,plane.y,plane.width,plane.height)
-
-}else{
-
-ctx.drawImage(frames[currentFrame],plane.x,plane.y,plane.width,plane.height)
-
-}
-
-}
-
-if(gameState==="game"){
+ctx.fillStyle="red"
+ctx.fillRect(plane.x,plane.y,plane.width,plane.height)
 
 ctx.fillStyle="black"
 ctx.font="24px Arial"
 ctx.fillText("Score: "+score,10,30)
 
+if(gameState==="menu"){
+
+ctx.font="30px Arial"
+ctx.fillText("Tap to Start",120,350)
+
 }
 
 if(gameOver){
 
-ctx.fillStyle="black"
 ctx.font="40px Arial"
 ctx.fillText("Game Over",110,300)
-
-ctx.font="20px Arial"
-ctx.fillText("Press Jump to Restart",90,340)
-
-}
-
-if(gameState==="menu"){
-
-ctx.fillStyle="black"
-ctx.font="30px Arial"
-ctx.fillText("Cat Sky Game",100,150)
-
-ctx.font="20px Arial"
-
-if(menuOption===0){
-
-ctx.fillText("> Start Game",130,250)
-
-}else{
-
-ctx.fillText("Start Game",130,250)
-
-}
-
-if(menuOption===1){
-
-ctx.fillText("> Change Jump Key",110,300)
-
-}else{
-
-ctx.fillText("Change Jump Key",110,300)
-
-}
-
-if(waitingKey){
-
-ctx.fillText("Press a new key...",110,360)
-
-}
-
-}
-
-ctx.fillStyle="black"
-ctx.font="16px Arial"
-ctx.fillText("P to pause",canvas.width-110,20)
-
-if(paused){
-
-ctx.font="40px Arial"
-ctx.fillText("Paused",130,300)
 
 }
 
@@ -550,23 +270,18 @@ ctx.fillText("Paused",130,300)
 
 /* LOOP */
 
-let lastTime=0
+function loop(){
 
-function loop(time){
-
-let delta=(time-lastTime)/16.67
-lastTime=time
-
-update(delta)
+update()
 draw()
 
 requestAnimationFrame(loop)
 
 }
 
-playMenuMusic()
+menuMusic.play().catch(()=>{})
 
-requestAnimationFrame(loop)
+loop()
 
 </script>
 
