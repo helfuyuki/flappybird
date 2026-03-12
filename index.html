@@ -4,286 +4,440 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cat Game</title>
-
 <style>
-
-body{
-margin:0;
-background:#191970;
-overflow:hidden;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
+body {
+    margin: 0;
+    background: #191970;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
 }
-
-canvas{
-background:white;
-border:2px solid black;
-width:85vw;
-max-width:420px;
-height:auto;
-touch-action:none;
+canvas {
+    background: white;
+    border: 2px solid black;
+    width: 85vw;
+    max-width: 420px;
+    height: auto;
+    touch-action: none;
 }
-
 </style>
 </head>
-
 <body>
 
 <canvas id="game" width="400" height="800"></canvas>
 
-<audio id="backgroundMusic" src="playlist.mp3" loop></audio>
-<audio id="jumpSound" src="jump.mp3"></audio>
-<audio id="menuMusic" src="kitty.mp3" loop></audio>
+<audio id="backgroundMusic" src="playlist.mp3" loop preload="auto"></audio>
+<audio id="jumpSound" src="jump.mp3" preload="auto"></audio>
+<audio id="menuMusic" src="kitty.mp3" loop preload="auto"></audio>
 
 <script>
 
-const canvas=document.getElementById("game")
-const ctx=canvas.getContext("2d")
-
-/* ÁUDIOS */
-
-const backgroundMusic=document.getElementById("backgroundMusic")
-backgroundMusic.volume=0.6
-
-const jumpSound=document.getElementById("jumpSound")
-jumpSound.volume=0.2
-
-const menuMusic=document.getElementById("menuMusic")
-menuMusic.volume=0.5
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+ctx.imageSmoothingEnabled = false;
 
 /* BACKGROUND */
-
-const sky=new Image()
-sky.src="sky.png"
+const sky = new Image();
+sky.src = "sky.png";
 
 /* CANOS */
+const pipeBottom = new Image();
+pipeBottom.src = "cano1.png";
 
-const pipeBottom=new Image()
-pipeBottom.src="cano1.png"
+const pipeTop = new Image();
+pipeTop.src = "cano2.png";
 
-const pipeTop=new Image()
-pipeTop.src="cano2.png"
+/* NUVENS */
+const clouds = [];
+for(let i=1;i<=3;i++){
+    let img=new Image();
+    img.src="cloud"+i+".png";
+    clouds.push(img);
+}
+
+let cloudList=[];
+for(let i=0;i<8;i++){
+    cloudList.push({
+        x:Math.random()*canvas.width,
+        y:Math.random()*300,
+        speed:1+Math.random()*0.6,
+        frame:Math.floor(Math.random()*clouds.length)
+    });
+}
 
 /* PERSONAGEM */
-
 let plane={
-x:80,
-y:300,
-width:80,
-height:80,
-velocity:0
-}
+    x:80,
+    y:300,
+    width:80,
+    height:80,
+    velocity:0
+};
 
-let gravity=0.25
-let jump=-6
+let gravity=0.25;
+let jump=-6;
 
 /* CANOS */
-
-let towerX=canvas.width
-let gapSize=250
-let gapY=Math.random()*(canvas.height-gapSize-200)
-let speed=2
+let towerX=canvas.width;
+let gapSize=250;
+let gapY=Math.random()*(canvas.height-gapSize-200);
+let speed=2;
 
 /* SCORE */
-
-let score=0
-let passed=false
+let score=0;
+let passed=false;
 
 /* ESTADO */
+let gameState="menu";
+let gameOver=false;
+let menuOption=0;
+let jumpKey="Space";
+let waitingKey=false;
+let paused=false;
 
-let gameState="menu"
-let gameOver=false
+/* IMAGENS PERSONAGEM */
+const frames=[];
+for(let i=1;i<=5;i++){
+    let img=new Image();
+    img.src="frame"+i+".png";
+    frames.push(img);
+}
+
+const fallImage=new Image();
+fallImage.src="caindo.png";
+
+/* ANIMAÇÃO */
+let currentFrame=0;
+let frameTimer=0;
+let frameSpeed=5;
+
+/* ÁUDIOS */
+const backgroundMusic=document.getElementById("backgroundMusic");
+backgroundMusic.volume=0.6;
+
+const jumpSound=document.getElementById("jumpSound");
+jumpSound.volume=0.2;
+
+const menuMusic=document.getElementById("menuMusic");
+menuMusic.volume=0.5;
+
+let audioUnlocked=false;
+
+/* DESBLOQUEIO ÁUDIO MOBILE */
+function unlockAudio(){
+    if(audioUnlocked) return;
+
+    backgroundMusic.play().then(()=>{
+        backgroundMusic.pause();
+        backgroundMusic.currentTime=0;
+    }).catch(()=>{});
+
+    menuMusic.play().then(()=>{
+        menuMusic.pause();
+        menuMusic.currentTime=0;
+    }).catch(()=>{});
+
+    jumpSound.play().then(()=>{
+        jumpSound.pause();
+        jumpSound.currentTime=0;
+    }).catch(()=>{});
+
+    audioUnlocked=true;
+}
+
+/* MENU MUSIC */
+function playMenuMusic(){
+    if(gameState==="menu"){
+        menuMusic.currentTime=0;
+        menuMusic.play().catch(()=>{});
+    }
+}
+
+function stopMenuMusic(){
+    menuMusic.pause();
+    menuMusic.currentTime=0;
+}
 
 /* INPUT */
-
 function action(){
 
-if(gameState==="menu"){
+    if(gameState==="menu"){
 
-gameState="game"
-menuMusic.pause()
+        if(menuOption===0){
+            gameState="game";
+            resetGame();
+            stopMenuMusic();
+            backgroundMusic.currentTime=0;
+            backgroundMusic.play().catch(()=>{});
+        }
 
-backgroundMusic.currentTime=0
-backgroundMusic.play().catch(()=>{})
+        if(menuOption===1){
+            waitingKey=true;
+        }
 
-resetGame()
-return
+        return;
+    }
 
+    if(gameOver){
+        resetGame();
+        return;
+    }
+
+    plane.velocity=jump;
+
+    jumpSound.currentTime=0;
+    jumpSound.play().catch(()=>{});
 }
 
-if(gameOver){
-
-resetGame()
-return
-
-}
-
-plane.velocity=jump
-
-jumpSound.currentTime=0
-jumpSound.play().catch(()=>{})
-
-}
-
-/* CONTROLES */
-
-canvas.addEventListener("mousedown",function(){
-
-if(gameState==="menu"){
-
-backgroundMusic.play().catch(()=>{})
-
-}
-
-action()
-
-})
-
-canvas.addEventListener("touchstart",function(){
-
-if(gameState==="menu"){
-
-backgroundMusic.play().catch(()=>{})
-
-}
-
-action()
-
-})
-
+/* TECLADO */
 document.addEventListener("keydown",function(e){
 
-if(e.code==="Space"){
+    if(e.code==="KeyP" && gameState==="game" && !gameOver){
+        paused=!paused;
+    }
 
-action()
+    if(gameState==="menu"){
 
-}
+        if(waitingKey){
+            jumpKey=e.code;
+            waitingKey=false;
+            return;
+        }
 
-})
+        if(e.code==="ArrowUp") menuOption=0;
+        if(e.code==="ArrowDown") menuOption=1;
+
+        if(e.code==="Enter"){
+            action();
+        }
+
+        return;
+    }
+
+    if(e.code===jumpKey){
+        action();
+    }
+
+});
+
+/* TOUCH */
+canvas.addEventListener("touchstart",function(){
+    unlockAudio();
+
+    if(gameState==="menu"){
+        playMenuMusic();
+    }
+
+    action();
+});
+
+/* MOUSE */
+canvas.addEventListener("mousedown",function(){
+    unlockAudio();
+
+    if(gameState==="menu"){
+        playMenuMusic();
+    }
+
+    action();
+});
 
 /* RESET */
-
 function resetGame(){
 
-plane.y=300
-plane.velocity=0
+    plane.y=300;
+    plane.velocity=0;
 
-towerX=canvas.width
-gapY=Math.random()*(canvas.height-gapSize-200)
+    towerX=canvas.width;
+    gapY=Math.random()*(canvas.height-gapSize-200);
 
-score=0
-passed=false
-gameOver=false
-
+    score=0;
+    passed=false;
+    gameOver=false;
 }
 
 /* COLISÃO */
-
 function checkCollision(){
 
-if(
+    const margin=12;
 
-plane.x+plane.width>towerX &&
-plane.x<towerX+80 &&
-(plane.y<gapY || plane.y+plane.height>gapY+gapSize)
+    const px=plane.x+margin;
+    const py=plane.y+margin;
+    const pw=plane.width-margin*2;
+    const ph=plane.height-margin*2;
 
-){
+    let topCanoHeight=gapY;
 
-gameOver=true
+    if(
+        px+pw>towerX &&
+        px<towerX+80 &&
+        (py<topCanoHeight)
+    ){
+        gameOver=true;
+    }
 
-}
-
+    if(
+        px+pw>towerX &&
+        px<towerX+80 &&
+        (py+ph>gapY+gapSize)
+    ){
+        gameOver=true;
+    }
 }
 
 /* UPDATE */
+function update(delta){
 
-function update(){
+    if(gameState!=="game") return;
+    if(gameOver) return;
+    if(paused) return;
 
-if(gameState!=="game") return
-if(gameOver) return
+    plane.velocity+=gravity*delta;
+    plane.y+=plane.velocity*delta;
 
-plane.velocity+=gravity
-plane.y+=plane.velocity
+    if(plane.y>=canvas.height-plane.height){
+        gameOver=true;
+    }
 
-if(plane.y>=canvas.height-plane.height){
+    towerX-=speed*delta;
 
-gameOver=true
+    if(towerX<-80){
+        towerX=canvas.width;
+        gapY=Math.random()*(canvas.height-gapSize-200);
+        passed=false;
+    }
 
-}
+    if(towerX+80<plane.x && !passed){
+        score++;
+        passed=true;
+    }
 
-towerX-=speed
+    checkCollision();
 
-if(towerX<-80){
+    if(plane.velocity<0){
+        frameTimer+=delta;
 
-towerX=canvas.width
-gapY=Math.random()*(canvas.height-gapSize-200)
-passed=false
+        if(frameTimer>=frameSpeed){
+            frameTimer=0;
+            currentFrame++;
 
-}
+            if(currentFrame>=frames.length){
+                currentFrame=0;
+            }
+        }
+    }
 
-if(towerX+80<plane.x && !passed){
+    for(let cloud of cloudList){
 
-score++
-passed=true
+        cloud.x-=cloud.speed*delta;
 
-}
-
-checkCollision()
-
+        if(cloud.x<-150){
+            cloud.x=canvas.width+Math.random()*200;
+            cloud.y=Math.random()*300;
+            cloud.frame=Math.floor(Math.random()*clouds.length);
+        }
+    }
 }
 
 /* DRAW */
-
 function draw(){
 
-ctx.clearRect(0,0,canvas.width,canvas.height)
+    ctx.clearRect(0,0,canvas.width,canvas.height);
 
-ctx.drawImage(sky,0,0,canvas.width,canvas.height)
+    ctx.drawImage(sky,0,0,canvas.width,canvas.height);
 
-ctx.drawImage(pipeTop,towerX,0,80,gapY)
-ctx.drawImage(pipeBottom,towerX,gapY+gapSize,80,canvas.height)
+    for(let cloud of cloudList){
+        ctx.drawImage(clouds[cloud.frame],cloud.x,cloud.y,120,70);
+    }
 
-ctx.fillStyle="red"
-ctx.fillRect(plane.x,plane.y,plane.width,plane.height)
+    let stretchFactor=1.3;
 
-ctx.fillStyle="black"
-ctx.font="24px Arial"
-ctx.fillText("Score: "+score,10,30)
+    let topHeight=gapY*stretchFactor;
+    let bottomHeight=(canvas.height-(gapY+gapSize))*stretchFactor;
 
-if(gameState==="menu"){
+    bottomHeight=Math.min(bottomHeight,canvas.height-(gapY+gapSize));
 
-ctx.font="30px Arial"
-ctx.fillText("Tap to Start",120,350)
+    ctx.drawImage(pipeTop,towerX,0,80,topHeight);
+    ctx.drawImage(pipeBottom,towerX,gapY+gapSize,80,bottomHeight);
 
-}
+    if(gameState==="game"||gameOver){
 
-if(gameOver){
+        if(plane.velocity>0){
+            ctx.drawImage(fallImage,plane.x,plane.y,plane.width,plane.height);
+        }else{
+            ctx.drawImage(frames[currentFrame],plane.x,plane.y,plane.width,plane.height);
+        }
+    }
 
-ctx.font="40px Arial"
-ctx.fillText("Game Over",110,300)
+    if(gameState==="game"){
+        ctx.fillStyle="black";
+        ctx.font="24px Arial";
+        ctx.fillText("Score: "+score,10,30);
+    }
 
-}
+    if(gameOver){
+        ctx.fillStyle="black";
+        ctx.font="40px Arial";
+        ctx.fillText("Game Over",110,300);
+        ctx.font="20px Arial";
+        ctx.fillText("Press Jump to Restart",90,340);
+    }
 
+    if(gameState==="menu"){
+
+        ctx.fillStyle="black";
+        ctx.font="30px Arial";
+        ctx.fillText("Cat Sky Game",100,150);
+
+        ctx.font="20px Arial";
+
+        if(menuOption===0){
+            ctx.fillText("> Start Game",130,250);
+        }else{
+            ctx.fillText("Start Game",130,250);
+        }
+
+        if(menuOption===1){
+            ctx.fillText("> Change Jump Key",110,300);
+        }else{
+            ctx.fillText("Change Jump Key",110,300);
+        }
+
+        if(waitingKey){
+            ctx.fillText("Press a new key...",110,360);
+        }
+    }
+
+    ctx.fillStyle="black";
+    ctx.font="16px Arial";
+    ctx.fillText("P to pause",canvas.width-110,20);
+
+    if(paused){
+        ctx.font="40px Arial";
+        ctx.fillText("Paused",130,300);
+    }
 }
 
 /* LOOP */
 
-function loop(){
+let lastTime=0;
 
-update()
-draw()
+function loop(time){
 
-requestAnimationFrame(loop)
+    let delta=(time-lastTime)/16.67;
+    lastTime=time;
 
+    update(delta);
+    draw();
+
+    requestAnimationFrame(loop);
 }
 
-menuMusic.play().catch(()=>{})
-
-loop()
+playMenuMusic();
+requestAnimationFrame(loop);
 
 </script>
-
 </body>
 </html>
