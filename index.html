@@ -1,9 +1,11 @@
+```html
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cat Game</title>
+
 <style>
 body{
 margin:0;
@@ -14,6 +16,7 @@ justify-content:center;
 align-items:center;
 height:100vh;
 }
+
 canvas{
 background:white;
 border:2px solid black;
@@ -23,6 +26,7 @@ height:auto;
 touch-action:none;
 }
 </style>
+
 </head>
 <body>
 
@@ -46,6 +50,20 @@ jumpSound.volume=0.2
 
 const menuMusic=document.getElementById("menuMusic")
 menuMusic.volume=0.5
+
+let audioUnlocked=false
+
+function unlockAudio(){
+
+if(audioUnlocked) return
+
+menuMusic.play().then(()=>{
+menuMusic.pause()
+menuMusic.currentTime=0
+audioUnlocked=true
+}).catch(()=>{})
+
+}
 
 const sky=new Image()
 sky.src="sky.png"
@@ -114,7 +132,7 @@ let frameTimer=0
 let frameSpeed=5
 
 function playMenuMusic(){
-if(gameState==="menu"){
+if(gameState==="menu" && audioUnlocked){
 menuMusic.play().catch(()=>{})
 }
 }
@@ -190,11 +208,17 @@ action()
 })
 
 canvas.addEventListener("touchstart",function(){
+
+unlockAudio()
 action()
+
 })
 
 canvas.addEventListener("mousedown",function(){
+
+unlockAudio()
 action()
+
 })
 
 function resetGame(){
@@ -366,6 +390,8 @@ if(waitingKey){
 ctx.fillText("Press a new key...",110,360)
 }
 
+playMenuMusic()
+
 }
 
 ctx.fillStyle="black"
@@ -393,9 +419,10 @@ requestAnimationFrame(loop)
 
 }
 
-playMenuMusic()
 requestAnimationFrame(loop)
 
 </script>
+
 </body>
 </html>
+```
