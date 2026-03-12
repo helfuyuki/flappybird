@@ -71,7 +71,7 @@
         /* CANOS */
         let towerX = canvas.width;
         let gapSize = 250; // Aumentar o tamanho do espaço
-        let gapY = Math.random() * (canvas.height - gapSize - 200);
+        let gapY = Math.random() * (canvas.height - gapSize - 200); // Reserve um espaço extra
         let speed = 2;
         /* SCORE */
         let score = 0;
@@ -106,7 +106,7 @@
         const menuMusic = document.getElementById('menuMusic');
         menuMusic.volume = 0.5; // Ajustado para 50% do volume
         function playMenuMusic() {
-            menuMusic.play().catch((error) => {
+            menuMusic.play().catch(error => {
                 console.error("Erro ao tentar tocar a música do menu:", error);
             });
         }
@@ -151,29 +151,27 @@
                 if (e.code === "Enter") {
                     action();
                 }
-                // Inicia a música do menu ao apertar qualquer tecla
-                playMenuMusic();
                 return;
             }
             if (e.code === jumpKey) {
                 action();
             }
         });
-        /* MOUSE */
-        canvas.addEventListener("mousedown", function () {
-            if (gameState === "menu") {
-                playMenuMusic(); // Toca a música do menu no clique
-            }
-            action();
-        });
-        /* TOUCH */
+        /* Adicionando evento de toque para iniciar a música do menu */
         canvas.addEventListener("touchstart", function (e) {
             e.preventDefault();
             if (gameState === "menu") {
-                playMenuMusic(); // Toca a música do menu no toque
+                playMenuMusic(); // Tocar a música do menu no toque
             }
-            action();
+            action(); // Chama a ação geral
         }, { passive: false });
+        /* MOUSE */
+        canvas.addEventListener("mousedown", function () {
+            if (gameState === "menu") {
+                playMenuMusic(); // Tocar a música do menu no clique
+            }
+            action(); // Chama a ação geral
+        });
         /* RESET */
         function resetGame() {
             plane.y = 300;
@@ -330,7 +328,18 @@
             requestAnimationFrame(loop);
         }
         /* Toca a música do menu ao iniciar */
-        playMenuMusic(); // Inicialmente toca a música do menu
+        canvas.addEventListener("touchstart", function () {
+            if (gameState === "menu") {
+                playMenuMusic(); // Tocar a música do menu no toque
+            }
+        });
+        canvas.addEventListener("mousedown", function () {
+            if (gameState === "menu") {
+                playMenuMusic(); // Tocar a música do menu no clique
+            }
+        });
+        // Iniciar a reprodução do menu para garantir a interatividade do usuário
+        playMenuMusic(); // Toca a música do menu inicialmente
         requestAnimationFrame(loop);
     </script>
 </body>
