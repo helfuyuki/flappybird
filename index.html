@@ -133,47 +133,45 @@ backgroundMusic.volume = 0.4;
 let jumpSound = new Audio("jump.mp3");
 jumpSound.volume = 0.2;
 
-let audioUnlocked = false;
+let audioStarted = false;
 
-function unlockAudio(){
+function startAudio(){
 
-if(audioUnlocked) return;
+if(audioStarted) return;
 
-audioUnlocked = true;
+audioStarted = true;
 
-backgroundMusic.play().then(()=>{
-backgroundMusic.pause();
-backgroundMusic.currentTime = 0;
-}).catch(()=>{});
-
-jumpSound.play().then(()=>{
-jumpSound.pause();
-jumpSound.currentTime = 0;
-}).catch(()=>{});
-
-}
-
-document.addEventListener("touchstart", unlockAudio, {once:true});
-document.addEventListener("mousedown", unlockAudio, {once:true});
-document.addEventListener("pointerdown", unlockAudio, {once:true});
-
-function playMusic(){
-
-if(!audioUnlocked) return;
+/* inicia música no primeiro toque */
 
 backgroundMusic.play().catch(()=>{});
 
 }
 
-function playJump(){
+/* desbloqueia áudio no primeiro toque */
 
-if(!audioUnlocked) return;
+canvas.addEventListener("touchstart", startAudio, {once:true});
+canvas.addEventListener("mousedown", startAudio, {once:true});
+canvas.addEventListener("pointerdown", startAudio, {once:true});
 
-jumpSound.currentTime = 0;
-jumpSound.play().catch(()=>{});
+function playMusic(){
+
+if(!audioStarted) return;
+
+if(backgroundMusic.paused){
+backgroundMusic.play().catch(()=>{});
+}
 
 }
 
+function playJump(){
+
+if(!audioStarted) return;
+
+let jumpClone = jumpSound.cloneNode();
+jumpClone.volume = 0.2;
+jumpClone.play().catch(()=>{});
+
+}
 /* INPUT */
 
 function action(){
