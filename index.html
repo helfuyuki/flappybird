@@ -120,23 +120,21 @@ const jumpSound = document.getElementById("jumpSound");
 backgroundMusic.volume = 0.4;
 jumpSound.volume = 0.2;
 
-let audioUnlocked = false;
+let unlocked = false;
 
-function unlockAudio(){
+document.addEventListener("pointerdown", () => {
 
-if(audioUnlocked) return;
+if(unlocked) return;
+unlocked = true;
 
-audioUnlocked = true;
-
-backgroundMusic.play().then(()=>{
-backgroundMusic.pause();
-backgroundMusic.currentTime = 0;
+document.querySelectorAll("audio").forEach(audio=>{
+audio.play().then(()=>{
+audio.pause();
+audio.currentTime = 0;
 }).catch(()=>{});
+});
 
-jumpSound.play().then(()=>{
-jumpSound.pause();
-jumpSound.currentTime = 0;
-}).catch(()=>{});
+}, {once:true});
 
 }
 
