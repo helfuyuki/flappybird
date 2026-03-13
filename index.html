@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cat Game</title>
+
 <style>
 body{
 margin:0;
@@ -14,16 +15,18 @@ justify-content:center;
 align-items:center;
 height:100vh;
 }
-canvas {
-    background: white;
-    border: 2px solid black;
-    width: 85vw;
-    max-width: 420px;
-    height: auto;
-    touch-action: none;
+
+canvas{
+background:white;
+border:2px solid black;
+width:85vw;
+max-width:420px;
+height:auto;
+touch-action:none;
 }
 </style>
 </head>
+
 <body>
 
 <canvas id="game" width="400" height="800"></canvas>
@@ -38,10 +41,12 @@ const ctx = canvas.getContext("2d");
 ctx.imageSmoothingEnabled = false;
 
 /* BACKGROUND */
+
 const sky = new Image();
 sky.src = "sky.png";
 
 /* CANOS */
+
 const pipeBottom = new Image();
 pipeBottom.src = "cano1.png";
 
@@ -49,7 +54,9 @@ const pipeTop = new Image();
 pipeTop.src = "cano2.png";
 
 /* NUVENS */
+
 const clouds = [];
+
 for(let i = 1; i <= 3; i++){
 let img = new Image();
 img.src = "cloud" + i + ".png";
@@ -68,6 +75,7 @@ frame: Math.floor(Math.random() * clouds.length)
 }
 
 /* PERSONAGEM */
+
 let plane = {
 x:80,
 y:300,
@@ -80,16 +88,19 @@ let gravity = 0.25;
 let jump = -6;
 
 /* CANOS */
+
 let towerX = canvas.width;
 let gapSize = 250;
 let gapY = Math.random() * (canvas.height - gapSize - 200);
 let speed = 2;
 
 /* SCORE */
+
 let score = 0;
 let passed = false;
 
 /* ESTADO */
+
 let gameState = "menu";
 let gameOver = false;
 let menuOption = 0;
@@ -98,7 +109,9 @@ let waitingKey = false;
 let paused = false;
 
 /* PERSONAGEM FRAMES */
+
 const frames = [];
+
 for(let i = 1; i <= 5; i++){
 let img = new Image();
 img.src = "frame" + i + ".png";
@@ -109,23 +122,26 @@ const fallImage = new Image();
 fallImage.src = "caindo.png";
 
 /* ANIMAÇÃO */
+
 let currentFrame = 0;
 let frameTimer = 0;
 let frameSpeed = 5;
 
 /* AUDIO */
+
 const backgroundMusic = document.getElementById("backgroundMusic");
 const jumpSound = document.getElementById("jumpSound");
 
 backgroundMusic.volume = 0.4;
 jumpSound.volume = 0.2;
 
-let unlocked = false;
+let audioUnlocked = false;
 
-document.addEventListener("pointerdown", () => {
+function unlockAudio(){
 
-if(unlocked) return;
-unlocked = true;
+if(audioUnlocked) return;
+
+audioUnlocked = true;
 
 document.querySelectorAll("audio").forEach(audio=>{
 audio.play().then(()=>{
@@ -134,11 +150,11 @@ audio.currentTime = 0;
 }).catch(()=>{});
 });
 
-}, {once:true});
-
 }
 
 document.addEventListener("pointerdown", unlockAudio, {once:true});
+document.addEventListener("touchstart", unlockAudio, {once:true});
+document.addEventListener("mousedown", unlockAudio, {once:true});
 
 function playMusic(){
 
@@ -458,5 +474,6 @@ requestAnimationFrame(loop);
 requestAnimationFrame(loop);
 
 </script>
+
 </body>
 </html>
