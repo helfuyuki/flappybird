@@ -114,7 +114,6 @@ let frameTimer = 0;
 let frameSpeed = 5;
 
 /* AUDIO */
-
 const backgroundMusic = document.getElementById("backgroundMusic");
 const jumpSound = document.getElementById("jumpSound");
 
@@ -127,10 +126,11 @@ function unlockAudio(){
 
 if(audioUnlocked) return;
 
+audioUnlocked = true;
+
 backgroundMusic.play().then(()=>{
 backgroundMusic.pause();
 backgroundMusic.currentTime = 0;
-audioUnlocked = true;
 }).catch(()=>{});
 
 jumpSound.play().then(()=>{
@@ -140,19 +140,24 @@ jumpSound.currentTime = 0;
 
 }
 
-document.addEventListener("touchstart", unlockAudio, {once:true});
-document.addEventListener("mousedown", unlockAudio, {once:true});
+document.addEventListener("pointerdown", unlockAudio, {once:true});
 
 function playMusic(){
-if(audioUnlocked){
+
+if(!audioUnlocked) return;
+
 backgroundMusic.currentTime = 0;
-backgroundMusic.play();
-}
+backgroundMusic.play().catch(()=>{});
+
 }
 
 function playJump(){
+
+if(!audioUnlocked) return;
+
 jumpSound.currentTime = 0;
-jumpSound.play();
+jumpSound.play().catch(()=>{});
+
 }
 
 /* INPUT */
