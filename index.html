@@ -126,36 +126,42 @@ let frameSpeed = 5;
 
 /* AUDIO */
 
-let backgroundMusic = new Audio("playlist.mp3");
+const backgroundMusic = new Audio("playlist.mp3");
 backgroundMusic.loop = true;
 backgroundMusic.volume = 0.4;
+backgroundMusic.preload = "auto";
 
-let jumpSound = new Audio("jump.mp3");
+const jumpSound = new Audio("jump.mp3");
 jumpSound.volume = 0.2;
+jumpSound.preload = "auto";
 
-let audioStarted = false;
+let audioUnlocked = false;
 
-function startAudio(){
+function unlockAudio(){
 
-if(audioStarted) return;
+if(audioUnlocked) return;
 
-audioStarted = true;
+audioUnlocked = true;
 
-/* inicia música no primeiro toque */
+backgroundMusic.play().then(()=>{
+backgroundMusic.pause();
+backgroundMusic.currentTime = 0;
+}).catch(()=>{});
 
-backgroundMusic.play().catch(()=>{});
+jumpSound.play().then(()=>{
+jumpSound.pause();
+jumpSound.currentTime = 0;
+}).catch(()=>{});
 
 }
 
-/* desbloqueia áudio no primeiro toque */
-
-canvas.addEventListener("touchstart", startAudio, {once:true});
-canvas.addEventListener("mousedown", startAudio, {once:true});
-canvas.addEventListener("pointerdown", startAudio, {once:true});
+canvas.addEventListener("touchstart", unlockAudio, {once:true});
+canvas.addEventListener("mousedown", unlockAudio, {once:true});
+canvas.addEventListener("pointerdown", unlockAudio, {once:true});
 
 function playMusic(){
 
-if(!audioStarted) return;
+if(!audioUnlocked) return;
 
 if(backgroundMusic.paused){
 backgroundMusic.play().catch(()=>{});
@@ -165,13 +171,13 @@ backgroundMusic.play().catch(()=>{});
 
 function playJump(){
 
-if(!audioStarted) return;
+if(!audioUnlocked) return;
 
-let jumpClone = jumpSound.cloneNode();
-jumpClone.volume = 0.2;
-jumpClone.play().catch(()=>{});
+jumpSound.currentTime = 0;
+jumpSound.play().catch(()=>{});
 
 }
+
 /* INPUT */
 
 function action(){
@@ -360,17 +366,11 @@ function draw(){
 
 ctx.clearRect(0,0,canvas.width,canvas.height);
 
-/* CÉU */
-
 ctx.drawImage(sky,0,0,canvas.width,canvas.height);
-
-/* NUVENS */
 
 for(let cloud of cloudList){
 ctx.drawImage(clouds[cloud.frame],cloud.x,cloud.y,120,70);
 }
-
-/* CANOS */
 
 let stretchFactor = 1.3;
 
@@ -382,8 +382,6 @@ bottomHeight = Math.min(bottomHeight,canvas.height - (gapY + gapSize));
 ctx.drawImage(pipeTop,towerX,0,80,topHeight);
 ctx.drawImage(pipeBottom,towerX,gapY + gapSize,80,bottomHeight);
 
-/* PERSONAGEM */
-
 if(gameState === "game" || gameOver){
 
 if(plane.velocity > 0){
@@ -394,15 +392,11 @@ ctx.drawImage(frames[currentFrame],plane.x,plane.y,plane.width,plane.height);
 
 }
 
-/* SCORE */
-
 if(gameState === "game"){
 ctx.fillStyle = "black";
 ctx.font = "24px Arial";
 ctx.fillText("Score: " + score,10,30);
 }
-
-/* GAME OVER */
 
 if(gameOver){
 ctx.fillStyle = "black";
@@ -411,8 +405,6 @@ ctx.fillText("Game Over",110,300);
 ctx.font = "20px Arial";
 ctx.fillText("Press Jump to Restart",90,340);
 }
-
-/* MENU */
 
 if(gameState === "menu"){
 
@@ -439,8 +431,6 @@ ctx.fillText("Press a new key...",110,360);
 }
 
 }
-
-/* PAUSE */
 
 ctx.fillStyle = "black";
 ctx.font = "16px Arial";
