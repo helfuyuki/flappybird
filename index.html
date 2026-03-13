@@ -31,9 +31,6 @@ touch-action:none;
 
 <canvas id="game" width="400" height="800"></canvas>
 
-<audio id="backgroundMusic" src="playlist.mp3" loop></audio>
-<audio id="jumpSound" src="jump.mp3"></audio>
-
 <script>
 
 const canvas = document.getElementById("game");
@@ -129,10 +126,11 @@ let frameSpeed = 5;
 
 /* AUDIO */
 
-const backgroundMusic = document.getElementById("backgroundMusic");
-const jumpSound = document.getElementById("jumpSound");
-
+let backgroundMusic = new Audio("playlist.mp3");
+backgroundMusic.loop = true;
 backgroundMusic.volume = 0.4;
+
+let jumpSound = new Audio("jump.mp3");
 jumpSound.volume = 0.2;
 
 let audioUnlocked = false;
@@ -143,24 +141,26 @@ if(audioUnlocked) return;
 
 audioUnlocked = true;
 
-document.querySelectorAll("audio").forEach(audio=>{
-audio.play().then(()=>{
-audio.pause();
-audio.currentTime = 0;
+backgroundMusic.play().then(()=>{
+backgroundMusic.pause();
+backgroundMusic.currentTime = 0;
 }).catch(()=>{});
-});
+
+jumpSound.play().then(()=>{
+jumpSound.pause();
+jumpSound.currentTime = 0;
+}).catch(()=>{});
 
 }
 
-document.addEventListener("pointerdown", unlockAudio, {once:true});
 document.addEventListener("touchstart", unlockAudio, {once:true});
 document.addEventListener("mousedown", unlockAudio, {once:true});
+document.addEventListener("pointerdown", unlockAudio, {once:true});
 
 function playMusic(){
 
 if(!audioUnlocked) return;
 
-backgroundMusic.currentTime = 0;
 backgroundMusic.play().catch(()=>{});
 
 }
