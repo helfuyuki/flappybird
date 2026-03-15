@@ -164,6 +164,12 @@ frames.push(img);
 const fallImage=new Image();
 fallImage.src="caindo.png";
 
+/* VARIÁVEIS DA ANIMAÇÃO */
+
+let frameIndex=0;
+let frameTimer=0;
+let frameSpeed=6;
+
 /* AUDIO */
 
 const backgroundMusic=document.getElementById("backgroundMusic");
@@ -173,33 +179,25 @@ const menuMusic=document.getElementById("menuMusic");
 menuMusic.volume=0.5;
 
 /* SOM DO PULO */
-const jumpSounds = [];
-for (let i = 0; i < 4; i++) {
-    let s = new Audio("jump.mp3");
-    s.volume = sfxVolume;
-    jumpSounds.push(s);
-}
-let jumpIndex = 0;
-let isJumpSoundPlaying = false; // Identifica se o som do pulo está tocando
-function playJump() {
-    if (isJumpSoundPlaying) return; // Se o som já está tocando, não reproduza novamente
-    isJumpSoundPlaying = true; // Marque que o som está tocando
-    let s = jumpSounds[jumpIndex];
-    s.currentTime = 0; // Reinicia o som
-    s.play().then(() => {
-        s.onended = () => {
-            isJumpSoundPlaying = false; // Troca para falso quando o som terminar
-        };
-    }).catch(error => {
-        console.error("Erro ao tocar o som do pulo:", error);
-        isJumpSoundPlaying = false; // Reset caso haja um erro ao tocar
-    });
-    jumpIndex++;
-    if (jumpIndex >= jumpSounds.length) {
-        jumpIndex = 0; // Reseta o índice se ultrapassar o limite
-    }
-}
 
+const jumpSound=new Audio("jump.mp3");
+jumpSound.volume=sfxVolume;
+
+let lastJumpSound=0;
+let jumpSoundDelay=120;
+
+function playJump(){
+
+let now=Date.now();
+
+if(now-lastJumpSound<jumpSoundDelay)return;
+
+lastJumpSound=now;
+
+jumpSound.currentTime=0;
+jumpSound.play();
+
+}
 
 /* MENU MUSIC */
 
@@ -510,9 +508,25 @@ ctx.drawImage(pipeBottom,towerX,gapY+gapSize,80,bottomHeight);
 if(gameState==="game"||gameOver){
 
 if(plane.velocity>0){
+
 ctx.drawImage(fallImage,plane.x,plane.y,plane.width,plane.height);
+
 }else{
-ctx.drawImage(frames[0],plane.x,plane.y,plane.width,plane.height);
+
+frameTimer++;
+
+if(frameTimer>frameSpeed){
+
+frameTimer=0;
+frameIndex++;
+
+if(frameIndex>=frames.length)
+frameIndex=0;
+
+}
+
+ctx.drawImage(frames[frameIndex],plane.x,plane.y,plane.width,plane.height);
+
 }
 
 }
