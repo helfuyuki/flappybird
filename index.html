@@ -164,7 +164,7 @@ frames.push(img);
 const fallImage=new Image();
 fallImage.src="caindo.png";
 
-/* ANIMAÇÃO DO GATO */
+/* VARIÁVEIS DA ANIMAÇÃO */
 
 let frameIndex=0;
 let frameTimer=0;
@@ -178,45 +178,34 @@ backgroundMusic.volume=musicVolume;
 const menuMusic=document.getElementById("menuMusic");
 menuMusic.volume=0.5;
 
-/* SOM DO PULO */
-
-const jumpSounds=[];
-
-for(let i=0;i<4;i++){
-let s=new Audio("jump.mp3");
-s.volume=sfxVolume;
-jumpSounds.push(s);
+/* SON DO PULO */
+const jumpSounds = [];
+for (let i = 0; i < 4; i++) {
+    let s = new Audio("jump.mp3");
+    s.volume = sfxVolume;
+    jumpSounds.push(s);
+}
+let jumpIndex = 0;
+let isJumpSoundPlaying = false; // Identifica se o som do pulo está tocando
+function playJump() {
+    if (isJumpSoundPlaying) return; // Se o som já está tocando, não reproduza novamente
+    isJumpSoundPlaying = true; // Marque que o som está tocando
+    let s = jumpSounds[jumpIndex];
+    s.currentTime = 0; // Reinicia o som
+    s.play().then(() => {
+        s.onended = () => {
+            isJumpSoundPlaying = false; // Troca para falso quando o som terminar
+        };
+    }).catch(error => {
+        console.error("Erro ao tocar o som do pulo:", error);
+        isJumpSoundPlaying = false; // Reset caso haja um erro ao tocar
+    });
+    jumpIndex++;
+    if (jumpIndex >= jumpSounds.length) {
+        jumpIndex = 0; // Reseta o índice se ultrapassar o limite
+    }
 }
 
-let jumpIndex=0;
-let isJumpSoundPlaying=false;
-
-function playJump(){
-
-if(isJumpSoundPlaying)return;
-
-isJumpSoundPlaying=true;
-
-let s=jumpSounds[jumpIndex];
-
-s.currentTime=0;
-
-s.play().then(()=>{
-
-s.onended=function(){
-isJumpSoundPlaying=false;
-};
-
-}).catch(()=>{
-isJumpSoundPlaying=false;
-});
-
-jumpIndex++;
-
-if(jumpIndex>=jumpSounds.length)
-jumpIndex=0;
-
-}
 
 /* MENU MUSIC */
 
@@ -317,9 +306,153 @@ sfxVolume+=amount;
 if(sfxVolume<0)sfxVolume=0;
 if(sfxVolume>1)sfxVolume=1;
 
-for(let s of jumpSounds){
-s.volume=sfxVolume;
+jumpSound.volume=sfxVolume;
+
 }
+
+/* MENU NAV */
+
+function moveUp(){
+
+if(gameState==="menu"){
+
+menuOption--;
+
+if(menuPage==="main" && menuOption<0)menuOption=2;
+if(menuPage==="controls" && menuOption<0)menuOption=1;
+if(menuPage==="audio" && menuOption<0)menuOption=2;
+
+}
+
+}
+
+function moveDown(){
+
+if(gameState==="menu"){
+
+menuOption++;
+
+if(menuPage==="main" && menuOption>2)menuOption=0;
+if(menuPage==="controls" && menuOption>1)menuOption=0;
+if(menuPage==="audio" && menuOption>2)menuOption=0;
+
+}
+
+}
+
+/* TECLADO */
+
+document.addEventListener("keydown",function(e){
+
+if(e.code==="KeyP" && gameState==="game")
+paused=!paused;
+
+if(gameState==="menu"){
+
+if(e.code==="ArrowUp")moveUp();
+if(e.code==="ArrowDown")moveDown();
+
+if(menuPage==="audio"){
+
+if(e.code==="ArrowLeft"){
+
+if(menuOption===0)adjustMusicVolume(-0.05);
+if(menuOption===1)adjustSFXVolume(-0.05);
+
+}
+
+if(e.code==="ArrowRight"){
+
+if(menuOption===0)adjustMusicVolume(0.05);
+if(menuOption===1)adjustSFXVolume(0.05);
+
+}
+
+}
+
+if(e.code==="Enter")action();
+
+}
+
+if(e.code==="Space" && gameState==="game")
+action();
+
+});
+
+/* BOTÕES MOBILE */
+
+document.getElementById("btnUp").onclick=moveUp;
+document.getElementById("btnDown").onclick=moveDown;
+document.getElementById("btnA").onclick=action;
+
+document.getElementById("btnLeft").onclick=function(){
+
+if(menuPage==="audio"){
+
+if(menuOption===0)adjustMusicVolume(-0.05);
+if(menuOption===1)adjustSFXVolume(-0.05);
+
+}
+
+};
+
+document.getElementById("btnRight").onclick=function(){
+
+if(menuPage==="audio"){
+
+if(menuOption===0)adjustMusicVolume(0.05);
+if(menuOption===1)adjustSFXVolume(0.05);
+
+}
+
+};
+
+/* TOUCH */
+
+canvas.addEventListener("touchstart",function(e){
+
+e.preventDefault();
+
+if(gameState==="game")
+action();
+
+},{passive:false});
+
+/* RESET */
+
+function resetGame(){
+
+plane.y=300;
+plane.velocity=0;
+
+towerX=canvas.width;
+
+gapY=Math.random()*(canvas.height-gapSize-200);
+
+score=0;
+passed=false;
+gameOver=false;
+
+}
+
+/* COLISÃO */
+
+function checkCollision(){
+
+const margin=12;
+
+const px=plane.x+margin;
+const py=plane.y+margin;
+const pw=plane.width-margin*2;
+const ph=plane.height-margin*2;
+
+let topCanoHeight=gapY;
+
+if(px+pw>towerX && px<towerX+80 && py<topCanoHeight)
+gameOver=true;
+
+if(px+pw>towerX && px<towerX+80 && py+ph>gapY+gapSize)
+gameOver=true;
 
 }
 
@@ -330,17 +463,14 @@ function update(delta){
 if(gameState!=="game")return;
 if(paused)return;
 if(gameOver)return;
-
-/* NUVENS */
-
 for(let cloud of cloudList){
 
-cloud.x-=cloud.speed*delta;
+cloud.x -= cloud.speed * delta;
 
-if(cloud.x<-150){
+if(cloud.x < -150){
 
-cloud.x=canvas.width+Math.random()*100;
-cloud.y=Math.random()*300;
+cloud.x = canvas.width + Math.random()*100;
+cloud.y = Math.random()*300;
 
 }
 
@@ -375,25 +505,6 @@ checkCollision();
 
 }
 
-/* COLISÃO */
-
-function checkCollision(){
-
-const margin=12;
-
-const px=plane.x+margin;
-const py=plane.y+margin;
-const pw=plane.width-margin*2;
-const ph=plane.height-margin*2;
-
-if(px+pw>towerX && px<towerX+80 && py<gapY)
-gameOver=true;
-
-if(px+pw>towerX && px<towerX+80 && py+ph>gapY+gapSize)
-gameOver=true;
-
-}
-
 /* DRAW */
 
 function draw(){
@@ -402,18 +513,17 @@ ctx.clearRect(0,0,canvas.width,canvas.height);
 
 ctx.drawImage(sky,0,0,canvas.width,canvas.height);
 
-/* NUVENS */
-
 for(let cloud of cloudList){
 ctx.drawImage(clouds[cloud.frame],cloud.x,cloud.y,120,70);
 }
 
-/* CANOS */
+let stretchFactor=1.3;
 
-ctx.drawImage(pipeTop,towerX,0,80,gapY);
-ctx.drawImage(pipeBottom,towerX,gapY+gapSize,80,canvas.height);
+let topHeight=gapY*stretchFactor;
+let bottomHeight=(canvas.height-(gapY+gapSize))*stretchFactor;
 
-/* GATO */
+ctx.drawImage(pipeTop,towerX,0,80,topHeight);
+ctx.drawImage(pipeBottom,towerX,gapY+gapSize,80,bottomHeight);
 
 if(gameState==="game"||gameOver){
 
@@ -441,6 +551,69 @@ ctx.drawImage(frames[frameIndex],plane.x,plane.y,plane.width,plane.height);
 
 }
 
+if(gameState==="game"){
+
+ctx.fillStyle="black";
+ctx.font="24px Arial";
+ctx.fillText("Score: "+score,10,30);
+
+}
+
+if(gameOver){
+
+ctx.fillStyle="black";
+ctx.font="40px Arial";
+ctx.fillText("Game Over",110,300);
+
+ctx.font="20px Arial";
+ctx.fillText("Press Jump to Restart",90,340);
+
+}
+
+if(gameState==="menu"){
+
+ctx.fillStyle="black";
+ctx.font="30px Arial";
+ctx.fillText("Cat Sky Game",100,150);
+
+ctx.font="20px Arial";
+
+if(menuPage==="main"){
+
+ctx.fillText((menuOption===0?"> ":"")+"Start Game",130,250);
+ctx.fillText((menuOption===1?"> ":"")+"Controls",130,300);
+ctx.fillText((menuOption===2?"> ":"")+"Audio",130,350);
+
+}
+
+if(menuPage==="controls"){
+
+ctx.fillText((menuOption===0?"> ":"")+"Change Jump Key",100,260);
+ctx.fillText((menuOption===1?"> ":"")+"Back",130,320);
+
+}
+
+if(menuPage==="audio"){
+
+ctx.fillText((menuOption===0?"> ":"")+"Music Volume: "+Math.round(musicVolume*100),90,260);
+ctx.fillText((menuOption===1?"> ":"")+"SFX Volume: "+Math.round(sfxVolume*100),100,320);
+ctx.fillText((menuOption===2?"> ":"")+"Back",140,380);
+
+}
+
+}
+
+ctx.fillStyle="black";
+ctx.font="16px Arial";
+ctx.fillText("P to pause",canvas.width-110,20);
+
+if(paused){
+
+ctx.font="40px Arial";
+ctx.fillText("Paused",130,300);
+
+}
+
 }
 
 /* LOOP */
@@ -454,6 +627,8 @@ let delta=(time-lastTime)/16.67;
 lastTime=time;
 
 update(delta);
+    
+}
 draw();
 
 requestAnimationFrame(loop);
