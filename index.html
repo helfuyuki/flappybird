@@ -13,6 +13,7 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
+            position: relative; /* Para posicionar os botões em relação ao corpo */
         }
         canvas {
             background: white;
@@ -22,14 +23,38 @@
             height: auto;
             touch-action: none;
         }
+        /* Estilo para os botões */
+        #ui {
+            position: absolute; /* Permite posicionar fora do canvas */
+            bottom: 20px; /* Distância do fundo */
+            display: flex;
+            gap: 10px; /* Espaçamento entre os botões */
+        }
+        button {
+            font-size: 20px;
+            padding: 10px 14px;
+            border: none;
+            border-radius: 8px;
+            background-color: #f0f0f0; /* Cor de fundo dos botões */
+            cursor: pointer; /* Mostra cursor de ponteiro ao passar sobre os botões */
+            transition: background-color 0.3s; /* Transição suave */
+        }
+        button:hover {
+            background-color: #ddd; /* Efeito hover */
+        }
     </style>
 </head>
 <body>
     <canvas id="game" width="400" height="800"></canvas>
+    <div id="ui">
+        <button id="btnUp">▲</button>
+        <button id="btnDown">▼</button>
+    </div>
     <audio id="backgroundMusic" src="playlist.mp3" loop></audio>
     <audio id="jumpSound" src="jump.mp3"></audio>
-    <audio id="menuMusic" src="kitty.mp3" loop></audio>
+    <audio id="menuMusic" src="kitty.mp3" loop></audio> <!-- Música do Menu -->
     <script>
+        // O código do jogo continua aqui
         const canvas = document.getElementById("game");
         const ctx = canvas.getContext("2d");
         ctx.imageSmoothingEnabled = false;
@@ -70,7 +95,7 @@
         /* CANOS */
         let towerX = canvas.width;
         let gapSize = 250; // Aumentar o tamanho do espaço
-        let gapY = Math.random() * (canvas.height - gapSize - 200);
+        let gapY = Math.random() * (canvas.height - gapSize - 200); // Reserve um espaço extra
         let speed = 2;
         /* SCORE */
         let score = 0;
@@ -106,11 +131,11 @@
             jumpSounds.push(s);
         }
         let jumpIndex = 0;
-        let isJumpSoundPlaying = false; // Controla o som do pulo
+        let isJumpSoundPlaying = false; // Controla se o som do pulo está tocando
         function playJump() {
             if (isJumpSoundPlaying) return; // Evitar tocar rapidamente
-            isJumpSoundPlaying = true; // Marcar que o som está tocando
-            let s = jumpSounds[jumpIndex]; // Pega o som atual
+            isJumpSoundPlaying = true; // Marca que o som está tocando
+            let s = jumpSounds[jumpIndex];
             s.currentTime = 0; // Reinicia o som
             s.play().then(() => {
                 s.onended = () => {
@@ -122,10 +147,10 @@
             });
             jumpIndex++;
             if (jumpIndex >= jumpSounds.length) {
-                jumpIndex = 0; // Reinicia o índice
+                jumpIndex = 0; // Reseta o índice
             }
         }
-        /* MÚSICA DO MENU */
+        /* INICIALIZAÇÃO DA MÚSICA DO MENU */
         const menuMusic = document.getElementById('menuMusic');
         menuMusic.volume = 0.5; // Ajustado para 50% do volume
         function playMenuMusic() {
@@ -155,10 +180,10 @@
                 return;
             }
             plane.velocity = jump;
-            playJump(); // Reproduzir o som do pulo
+            playJump(); // Tocar o som do pulo
         }
         /* TECLADO */
-        document.addEventListener("keydown", function(e) {
+        document.addEventListener("keydown", function (e) {
             if (e.code === "KeyP" && gameState === "game" && !gameOver) {
                 paused = !paused;
             }
@@ -168,10 +193,14 @@
                     waitingKey = false;
                     return;
                 }
-                if (e.code === "ArrowUp") menuOption--;
-                if (e.code === "ArrowDown") menuOption++;
-                if (menuOption < 0) menuOption = 2; // Ajustar conforme opções
-                if (menuOption > 2) menuOption = 0; // Ajustar conforme opções
+                if (e.code === "ArrowUp") {
+                    menuOption--;
+                    if (menuOption < 0) menuOption = 2; // Ajustar conforme opções
+                }
+                if (e.code === "ArrowDown") {
+                    menuOption++;
+                    if (menuOption > 2) menuOption = 0; // Ajustar conforme opções
+                }
                 if (e.code === "Enter") {
                     action();
                 }
@@ -181,19 +210,28 @@
                 action();
             }
         });
+        /* Eventos dos Botões */
+        document.getElementById("btnUp").onclick = function() {
+            if (gameState === "menu") {
+                menuOption--;
+                if (menuOption < 0) menuOption = 2; // Ajustar conforme opções
+                playMenuMusic(); // Tocar música do menu ao mudar opção
+            }
+        };
+        document.getElementById("btnDown").onclick = function() {
+            if (gameState === "menu") {
+                menuOption++;
+                if (menuOption > 2) menuOption = 0; // Ajustar conforme opções
+                playMenuMusic(); // Tocar música do menu ao mudar opção
+            }
+        };
         /* MOUSE e TOQUE */
-        canvas.addEventListener("mousedown", function() {
-            if (gameState === "menu") {
-                playMenuMusic(); // Tocar a música do menu no clique
-            }
-            action(); // Chama a ação geral
+        canvas.addEventListener("mousedown", function () {
+            action(); // Chama a ação geral ao clicar no canvas
         });
-        canvas.addEventListener("touchstart", function(e) {
+        canvas.addEventListener("touchstart", function (e) {
             e.preventDefault();
-            if (gameState === "menu") {
-                playMenuMusic(); // Tocar a música do menu no toque
-            }
-            action(); // Chama a ação geral
+            action(); // Chama a ação geral ao tocar na tela
         }, { passive: false });
         /* RESET */
         function resetGame() {
