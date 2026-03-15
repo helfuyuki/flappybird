@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cat Game</title>
@@ -173,29 +172,24 @@ backgroundMusic.volume=musicVolume;
 const menuMusic=document.getElementById("menuMusic");
 menuMusic.volume=0.5;
 
-/* SOM DO PULO */
+/* SOM DO PULO CORRIGIDO */
 
-const jumpSounds=[];
+const jumpSound=new Audio("jump.mp3");
+jumpSound.volume=sfxVolume;
 
-for(let i=0;i<4;i++){
-let s=new Audio("jump.mp3");
-s.volume=sfxVolume;
-jumpSounds.push(s);
-}
-
-let jumpIndex=0;
+let lastJumpSound=0;
+let jumpSoundDelay=120;
 
 function playJump(){
 
-let s=jumpSounds[jumpIndex];
+let now=Date.now();
 
-s.currentTime=0;
-s.play();
+if(now-lastJumpSound<jumpSoundDelay)return;
 
-jumpIndex++;
+lastJumpSound=now;
 
-if(jumpIndex>=jumpSounds.length)
-jumpIndex=0;
+jumpSound.currentTime=0;
+jumpSound.play();
 
 }
 
@@ -298,7 +292,7 @@ sfxVolume+=amount;
 if(sfxVolume<0)sfxVolume=0;
 if(sfxVolume>1)sfxVolume=1;
 
-jumpSounds.forEach(s=>s.volume=sfxVolume);
+jumpSound.volume=sfxVolume;
 
 }
 
@@ -342,7 +336,6 @@ paused=!paused;
 if(gameState==="menu"){
 
 if(e.code==="ArrowUp")moveUp();
-
 if(e.code==="ArrowDown")moveDown();
 
 if(menuPage==="audio"){
