@@ -24,6 +24,20 @@ max-width:420px;
 height:auto;
 touch-action:none;
 }
+
+#ui{
+position:fixed;
+bottom:20px;
+display:flex;
+gap:10px;
+}
+
+button{
+font-size:20px;
+padding:10px 14px;
+border:none;
+border-radius:8px;
+}
 </style>
 </head>
 
@@ -31,26 +45,33 @@ touch-action:none;
 
 <canvas id="game" width="400" height="800"></canvas>
 
+<div id="ui">
+<button id="btnUp">▲</button>
+<button id="btnDown">▼</button>
+<button id="btnLeft">◀</button>
+<button id="btnRight">▶</button>
+<button id="btnA">OK</button>
+</div>
+
 <audio id="backgroundMusic" src="playlist.mp3" loop></audio>
 <audio id="jumpSound" src="jump.mp3"></audio>
 
 <script>
 
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-ctx.imageSmoothingEnabled = false;
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
+ctx.imageSmoothingEnabled=false;
 
-const sky = new Image();
-sky.src = "sky.png";
+const sky=new Image();
+sky.src="sky.png";
 
-const pipeBottom = new Image();
-pipeBottom.src = "cano1.png";
+const pipeBottom=new Image();
+pipeBottom.src="cano1.png";
 
-const pipeTop = new Image();
-pipeTop.src = "cano2.png";
+const pipeTop=new Image();
+pipeTop.src="cano2.png";
 
-const clouds = [];
-
+const clouds=[];
 for(let i=1;i<=3;i++){
 let img=new Image();
 img.src="cloud"+i+".png";
@@ -58,7 +79,6 @@ clouds.push(img);
 }
 
 let cloudList=[];
-
 for(let i=0;i<8;i++){
 cloudList.push({
 x:Math.random()*canvas.width,
@@ -88,17 +108,23 @@ let score=0;
 let passed=false;
 
 let gameState="menu";
-let gameOver=false;
+let menuPage="main";
 let menuOption=0;
 let jumpKey="Space";
 let waitingKey=false;
 let paused=false;
+let gameOver=false;
 
 let musicVolume=0.4;
 let sfxVolume=0.2;
 
-const frames=[];
+const backgroundMusic=document.getElementById("backgroundMusic");
+backgroundMusic.volume=musicVolume;
 
+const jumpSound=document.getElementById("jumpSound");
+jumpSound.volume=sfxVolume;
+
+const frames=[];
 for(let i=1;i<=5;i++){
 let img=new Image();
 img.src="frame"+i+".png";
@@ -112,26 +138,10 @@ let currentFrame=0;
 let frameTimer=0;
 let frameSpeed=5;
 
-const backgroundMusic=document.getElementById("backgroundMusic");
-backgroundMusic.volume=musicVolume;
-
-const jumpSound=document.getElementById("jumpSound");
-jumpSound.volume=sfxVolume;
-
-function action(){
+function jumpAction(){
 
 if(gameState==="menu"){
-
-if(menuOption===0){
-gameState="game";
-resetGame();
-backgroundMusic.play();
-}
-
-if(menuOption===1){
-waitingKey=true;
-}
-
+menuSelect();
 return;
 }
 
@@ -141,83 +151,159 @@ return;
 }
 
 plane.velocity=jump;
-
 jumpSound.currentTime=0;
 jumpSound.play().catch(()=>{});
 
 }
 
-document.addEventListener("keydown",function(e){
+function menuSelect(){
 
-if(e.code==="KeyP" && gameState==="game" && !gameOver){
-paused=!paused;
+if(menuPage==="main"){
+
+if(menuOption===0){
+gameState="game";
+resetGame();
+backgroundMusic.play();
 }
 
+if(menuOption===1){
+menuPage="controls";
+menuOption=0;
+}
+
+if(menuOption===2){
+menuPage="audio";
+menuOption=0;
+}
+
+return;
+}
+
+if(menuPage==="controls"){
+
+if(menuOption===0){
+waitingKey=true;
+}
+
+if(menuOption===1){
+menuPage="main";
+menuOption=0;
+}
+
+}
+
+if(menuPage==="audio"){
+
+if(menuOption===2){
+menuPage="main";
+menuOption=0;
+}
+
+}
+
+}
+
+function moveUp(){
+
 if(gameState==="menu"){
+menuOption--;
+if(menuOption<0){
+if(menuPage==="main")menuOption=2;
+if(menuPage==="controls")menuOption=1;
+if(menuPage==="audio")menuOption=2;
+}
+}
+
+}
+
+function moveDown(){
+
+if(gameState==="menu"){
+menuOption++;
+
+if(menuPage==="main" && menuOption>2)menuOption=0;
+if(menuPage==="controls" && menuOption>1)menuOption=0;
+if(menuPage==="audio" && menuOption>2)menuOption=0;
+}
+
+}
+
+function moveLeft(){
+
+if(menuPage==="audio"){
+
+if(menuOption===0){
+musicVolume-=0.1;
+if(musicVolume<0)musicVolume=0;
+backgroundMusic.volume=musicVolume;
+}
+
+if(menuOption===1){
+sfxVolume-=0.1;
+if(sfxVolume<0)sfxVolume=0;
+jumpSound.volume=sfxVolume;
+}
+
+}
+
+}
+
+function moveRight(){
+
+if(menuPage==="audio"){
+
+if(menuOption===0){
+musicVolume+=0.1;
+if(musicVolume>1)musicVolume=1;
+backgroundMusic.volume=musicVolume;
+}
+
+if(menuOption===1){
+sfxVolume+=0.1;
+if(sfxVolume>1)sfxVolume=1;
+jumpSound.volume=sfxVolume;
+}
+
+}
+
+}
+
+document.addEventListener("keydown",e=>{
+
+if(e.code==="ArrowUp")moveUp();
+if(e.code==="ArrowDown")moveDown();
+if(e.code==="ArrowLeft")moveLeft();
+if(e.code==="ArrowRight")moveRight();
+
+if(e.code==="Enter")jumpAction();
+
+if(e.code===jumpKey && gameState==="game"){
+jumpAction();
+}
+
+if(e.code==="KeyP" && gameState==="game"){
+paused=!paused;
+}
 
 if(waitingKey){
 jumpKey=e.code;
 waitingKey=false;
-return;
-}
-
-if(e.code==="ArrowUp") menuOption--;
-if(e.code==="ArrowDown") menuOption++;
-
-if(menuOption<0) menuOption=3;
-if(menuOption>3) menuOption=0;
-
-if(e.code==="ArrowLeft"){
-
-if(menuOption===2){
-musicVolume-=0.1;
-if(musicVolume<0) musicVolume=0;
-backgroundMusic.volume=musicVolume;
-}
-
-if(menuOption===3){
-sfxVolume-=0.1;
-if(sfxVolume<0) sfxVolume=0;
-jumpSound.volume=sfxVolume;
-}
-
-}
-
-if(e.code==="ArrowRight"){
-
-if(menuOption===2){
-musicVolume+=0.1;
-if(musicVolume>1) musicVolume=1;
-backgroundMusic.volume=musicVolume;
-}
-
-if(menuOption===3){
-sfxVolume+=0.1;
-if(sfxVolume>1) sfxVolume=1;
-jumpSound.volume=sfxVolume;
-}
-
-}
-
-if(e.code==="Enter"){
-action();
-}
-
-return;
-}
-
-if(e.code===jumpKey){
-action();
 }
 
 });
 
-canvas.addEventListener("mousedown",action);
+canvas.addEventListener("mousedown",jumpAction);
 
-canvas.addEventListener("touchstart",function(e){
+canvas.addEventListener("touchstart",e=>{
 e.preventDefault();
-action();
+jumpAction();
 },{passive:false});
+
+document.getElementById("btnUp").onclick=moveUp;
+document.getElementById("btnDown").onclick=moveDown;
+document.getElementById("btnLeft").onclick=moveLeft;
+document.getElementById("btnRight").onclick=moveRight;
+document.getElementById("btnA").onclick=jumpAction;
 
 function resetGame(){
 
@@ -242,21 +328,11 @@ const py=plane.y+margin;
 const pw=plane.width-margin*2;
 const ph=plane.height-margin*2;
 
-let topCanoHeight=gapY;
-
-if(
-px+pw>towerX &&
-px<towerX+80 &&
-py<topCanoHeight
-){
+if(px+pw>towerX && px<towerX+80 && py<gapY){
 gameOver=true;
 }
 
-if(
-px+pw>towerX &&
-px<towerX+80 &&
-py+ph>gapY+gapSize
-){
+if(px+pw>towerX && px<towerX+80 && py+ph>gapY+gapSize){
 gameOver=true;
 }
 
@@ -264,9 +340,9 @@ gameOver=true;
 
 function update(delta){
 
-if(gameState!=="game") return;
-if(gameOver) return;
-if(paused) return;
+if(gameState!=="game")return;
+if(paused)return;
+if(gameOver)return;
 
 plane.velocity+=gravity*delta;
 plane.y+=plane.velocity*delta;
@@ -297,11 +373,7 @@ frameTimer+=delta;
 if(frameTimer>=frameSpeed){
 frameTimer=0;
 currentFrame++;
-
-if(currentFrame>=frames.length){
-currentFrame=0;
-}
-
+if(currentFrame>=frames.length)currentFrame=0;
 }
 
 }
@@ -311,11 +383,9 @@ for(let cloud of cloudList){
 cloud.x-=cloud.speed*delta;
 
 if(cloud.x<-150){
-
 cloud.x=canvas.width+Math.random()*200;
 cloud.y=Math.random()*300;
 cloud.frame=Math.floor(Math.random()*clouds.length);
-
 }
 
 }
@@ -342,7 +412,7 @@ bottomHeight=Math.min(bottomHeight,canvas.height-(gapY+gapSize));
 ctx.drawImage(pipeTop,towerX,0,80,topHeight);
 ctx.drawImage(pipeBottom,towerX,gapY+gapSize,80,bottomHeight);
 
-if(gameState==="game" || gameOver){
+if(gameState==="game"||gameOver){
 
 if(plane.velocity>0){
 ctx.drawImage(fallImage,plane.x,plane.y,plane.width,plane.height);
@@ -379,28 +449,31 @@ ctx.fillText("Cat Sky Game",100,150);
 
 ctx.font="20px Arial";
 
-if(menuOption===0)
-ctx.fillText("> Start Game",130,250);
-else
-ctx.fillText("Start Game",130,250);
+if(menuPage==="main"){
 
-if(menuOption===1)
-ctx.fillText("> Change Jump Key",110,300);
-else
-ctx.fillText("Change Jump Key",110,300);
+ctx.fillText((menuOption===0?"> ":"")+"Start Game",130,250);
+ctx.fillText((menuOption===1?"> ":"")+"Controls",130,300);
+ctx.fillText((menuOption===2?"> ":"")+"Audio",130,350);
 
-if(menuOption===2)
-ctx.fillText("> Music Volume: "+Math.round(musicVolume*100),110,350);
-else
-ctx.fillText("Music Volume: "+Math.round(musicVolume*100),110,350);
+}
 
-if(menuOption===3)
-ctx.fillText("> SFX Volume: "+Math.round(sfxVolume*100),110,400);
-else
-ctx.fillText("SFX Volume: "+Math.round(sfxVolume*100),110,400);
+if(menuPage==="controls"){
+
+ctx.fillText((menuOption===0?"> ":"")+"Change Jump Key",100,260);
+ctx.fillText((menuOption===1?"> ":"")+"Back",130,320);
 
 if(waitingKey){
-ctx.fillText("Press a new key...",110,460);
+ctx.fillText("Press a key...",120,380);
+}
+
+}
+
+if(menuPage==="audio"){
+
+ctx.fillText((menuOption===0?"> ":"")+"Music Volume: "+Math.round(musicVolume*100),90,260);
+ctx.fillText((menuOption===1?"> ":"")+"SFX Volume: "+Math.round(sfxVolume*100),100,320);
+ctx.fillText((menuOption===2?"> ":"")+"Back",140,380);
+
 }
 
 }
