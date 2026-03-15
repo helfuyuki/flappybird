@@ -131,7 +131,7 @@ for (let i = 0; i < 4; i++) {
 }
 let jumpIndex = 0;
 let lastJumpSoundTime = 0; // Armazena o tempo do último som do pulo
-const jumpSoundDelay = 250; // Delay em milissegundos
+const jumpSoundDelay = 500; // Delay em milissegundos
 function playJump() {
     let now = Date.now();
     if (now - lastJumpSoundTime < jumpSoundDelay) return; // Impede o tocamento rápido
