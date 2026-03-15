@@ -463,6 +463,18 @@ function update(delta){
 if(gameState!=="game")return;
 if(paused)return;
 if(gameOver)return;
+for(let cloud of cloudList){
+
+cloud.x -= cloud.speed * delta;
+
+if(cloud.x < -150){
+
+cloud.x = canvas.width + Math.random()*100;
+cloud.y = Math.random()*300;
+
+}
+
+}
 
 plane.velocity+=gravity*delta;
 plane.y+=plane.velocity*delta;
@@ -615,6 +627,8 @@ let delta=(time-lastTime)/16.67;
 lastTime=time;
 
 update(delta);
+    
+}
 draw();
 
 requestAnimationFrame(loop);
