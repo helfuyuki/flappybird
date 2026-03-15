@@ -146,6 +146,11 @@ let menuPage="main";
 
 let paused=false;
 
+/* NOVO SISTEMA DE TECLA DE PULO */
+
+let jumpKey="Space";
+let waitingForKey=false;
+
 /* VOLUME */
 
 let musicVolume=0.4;
@@ -164,7 +169,7 @@ frames.push(img);
 const fallImage=new Image();
 fallImage.src="caindo.png";
 
-/* VARIÁVEIS DA ANIMAÇÃO */
+/* ANIMAÇÃO */
 
 let frameIndex=0;
 let frameTimer=0;
@@ -180,33 +185,40 @@ menuMusic.volume=0.5;
 
 /* SOM DO PULO */
 
-const jumpSounds = [];
-for (let i = 0; i < 4; i++) {
-    let s = new Audio("jump.mp3");
-    s.volume = sfxVolume;
-    jumpSounds.push(s);
-}
-let jumpIndex = 0;
-let isJumpSoundPlaying = false; // Identifica se o som do pulo está tocando
-function playJump() {
-    if (isJumpSoundPlaying) return; // Se o som já está tocando, não reproduza novamente
-    isJumpSoundPlaying = true; // Marque que o som está tocando
-    let s = jumpSounds[jumpIndex];
-    s.currentTime = 0; // Reinicia o som
-    s.play().then(() => {
-        s.onended = () => {
-            isJumpSoundPlaying = false; // Troca para falso quando o som terminar
-        };
-    }).catch(error => {
-        console.error("Erro ao tocar o som do pulo:", error);
-        isJumpSoundPlaying = false; // Reset caso haja um erro ao tocar
-    });
-    jumpIndex++;
-    if (jumpIndex >= jumpSounds.length) {
-        jumpIndex = 0; // Reseta o índice se ultrapassar o limite
-    }
+const jumpSounds=[];
+for(let i=0;i<4;i++){
+let s=new Audio("jump.mp3");
+s.volume=sfxVolume;
+jumpSounds.push(s);
 }
 
+let jumpIndex=0;
+let isJumpSoundPlaying=false;
+
+function playJump(){
+
+if(isJumpSoundPlaying)return;
+
+isJumpSoundPlaying=true;
+
+let s=jumpSounds[jumpIndex];
+
+s.currentTime=0;
+
+s.play().then(()=>{
+s.onended=function(){
+isJumpSoundPlaying=false;
+};
+}).catch(()=>{
+isJumpSoundPlaying=false;
+});
+
+jumpIndex++;
+
+if(jumpIndex>=jumpSounds.length)
+jumpIndex=0;
+
+}
 
 /* MENU MUSIC */
 
@@ -252,6 +264,11 @@ return;
 }
 
 if(menuPage==="controls"){
+
+if(menuOption===0){
+waitingForKey=true;
+return;
+}
 
 if(menuOption===1){
 menuPage="main";
@@ -307,7 +324,9 @@ sfxVolume+=amount;
 if(sfxVolume<0)sfxVolume=0;
 if(sfxVolume>1)sfxVolume=1;
 
-jumpSound.volume=sfxVolume;
+for(let s of jumpSounds){
+s.volume=sfxVolume;
+}
 
 }
 
@@ -345,6 +364,12 @@ if(menuPage==="audio" && menuOption>2)menuOption=0;
 
 document.addEventListener("keydown",function(e){
 
+if(waitingForKey){
+jumpKey=e.code;
+waitingForKey=false;
+return;
+}
+
 if(e.code==="KeyP" && gameState==="game")
 paused=!paused;
 
@@ -375,7 +400,7 @@ if(e.code==="Enter")action();
 
 }
 
-if(e.code==="Space" && gameState==="game")
+if(e.code===jumpKey && gameState==="game")
 action();
 
 });
@@ -577,7 +602,7 @@ ctx.fillText((menuOption===2?"> ":"")+"Audio",130,350);
 
 if(menuPage==="controls"){
 
-ctx.fillText((menuOption===0?"> ":"")+"Change Jump Key",100,260);
+ctx.fillText((menuOption===0?"> ":"")+"Jump Key: "+jumpKey,100,260);
 ctx.fillText((menuOption===1?"> ":"")+"Back",130,320);
 
 }
