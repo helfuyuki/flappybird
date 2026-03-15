@@ -91,12 +91,9 @@ pipeTop.src="cano2.png";
 const clouds=[];
 
 for(let i=1;i<=3;i++){
-
 let img=new Image();
 img.src="cloud"+i+".png";
-
 clouds.push(img);
-
 }
 
 let cloudList=[];
@@ -104,12 +101,10 @@ let cloudList=[];
 for(let i=0;i<8;i++){
 
 cloudList.push({
-
 x:Math.random()*canvas.width,
 y:Math.random()*300,
 speed:1+Math.random()*0.6,
 frame:Math.floor(Math.random()*clouds.length)
-
 });
 
 }
@@ -117,13 +112,11 @@ frame:Math.floor(Math.random()*clouds.length)
 /* PERSONAGEM */
 
 let plane={
-
 x:80,
 y:300,
 width:80,
 height:80,
 velocity:0
-
 };
 
 let gravity=0.25;
@@ -150,7 +143,6 @@ let gameState="menu";
 let gameOver=false;
 
 let menuOption=0;
-
 let menuPage="main";
 
 let paused=false;
@@ -165,20 +157,13 @@ let sfxVolume=0.2;
 const frames=[];
 
 for(let i=1;i<=5;i++){
-
 let img=new Image();
 img.src="frame"+i+".png";
-
 frames.push(img);
-
 }
 
 const fallImage=new Image();
 fallImage.src="caindo.png";
-
-/* ANIMAÇÃO */
-
-let currentFrame=0;
 
 /* AUDIO */
 
@@ -188,16 +173,14 @@ backgroundMusic.volume=musicVolume;
 const menuMusic=document.getElementById("menuMusic");
 menuMusic.volume=0.5;
 
+/* SOM DO PULO */
+
 const jumpSounds=[];
 
 for(let i=0;i<4;i++){
-
 let s=new Audio("jump.mp3");
-
 s.volume=sfxVolume;
-
 jumpSounds.push(s);
-
 }
 
 let jumpIndex=0;
@@ -207,28 +190,24 @@ function playJump(){
 let s=jumpSounds[jumpIndex];
 
 s.currentTime=0;
-
 s.play();
 
 jumpIndex++;
 
-if(jumpIndex>=jumpSounds.length)jumpIndex=0;
+if(jumpIndex>=jumpSounds.length)
+jumpIndex=0;
 
 }
 
 /* MENU MUSIC */
 
 function playMenuMusic(){
-
 menuMusic.play().catch(()=>{});
-
 }
 
 function stopMenuMusic(){
-
 menuMusic.pause();
 menuMusic.currentTime=0;
-
 }
 
 /* MENU ACTION */
@@ -250,17 +229,13 @@ backgroundMusic.play();
 }
 
 if(menuOption===1){
-
 menuPage="controls";
 menuOption=0;
-
 }
 
 if(menuOption===2){
-
 menuPage="audio";
 menuOption=0;
-
 }
 
 return;
@@ -270,10 +245,8 @@ return;
 if(menuPage==="controls"){
 
 if(menuOption===1){
-
 menuPage="main";
 menuOption=0;
-
 }
 
 return;
@@ -282,15 +255,9 @@ return;
 
 if(menuPage==="audio"){
 
-if(menuOption===0)adjustMusicVolume(0.1);
-
-if(menuOption===1)adjustSFXVolume(0.1);
-
 if(menuOption===2){
-
 menuPage="main";
 menuOption=0;
-
 }
 
 return;
@@ -300,18 +267,13 @@ return;
 }
 
 if(gameOver){
-
 resetGame();
 return;
-
 }
 
 if(gameState==="game"){
-
 plane.velocity=jump;
-
 playJump();
-
 }
 
 }
@@ -374,7 +336,8 @@ if(menuPage==="audio" && menuOption>2)menuOption=0;
 
 document.addEventListener("keydown",function(e){
 
-if(e.code==="KeyP" && gameState==="game")paused=!paused;
+if(e.code==="KeyP" && gameState==="game")
+paused=!paused;
 
 if(gameState==="menu"){
 
@@ -382,21 +345,60 @@ if(e.code==="ArrowUp")moveUp();
 
 if(e.code==="ArrowDown")moveDown();
 
+if(menuPage==="audio"){
+
+if(e.code==="ArrowLeft"){
+
+if(menuOption===0)adjustMusicVolume(-0.05);
+if(menuOption===1)adjustSFXVolume(-0.05);
+
+}
+
+if(e.code==="ArrowRight"){
+
+if(menuOption===0)adjustMusicVolume(0.05);
+if(menuOption===1)adjustSFXVolume(0.05);
+
+}
+
+}
+
 if(e.code==="Enter")action();
 
 }
 
-if(e.code==="Space" && gameState==="game")action();
+if(e.code==="Space" && gameState==="game")
+action();
 
 });
 
 /* BOTÕES MOBILE */
 
 document.getElementById("btnUp").onclick=moveUp;
-
 document.getElementById("btnDown").onclick=moveDown;
-
 document.getElementById("btnA").onclick=action;
+
+document.getElementById("btnLeft").onclick=function(){
+
+if(menuPage==="audio"){
+
+if(menuOption===0)adjustMusicVolume(-0.05);
+if(menuOption===1)adjustSFXVolume(-0.05);
+
+}
+
+};
+
+document.getElementById("btnRight").onclick=function(){
+
+if(menuPage==="audio"){
+
+if(menuOption===0)adjustMusicVolume(0.05);
+if(menuOption===1)adjustSFXVolume(0.05);
+
+}
+
+};
 
 /* TOUCH */
 
@@ -404,7 +406,8 @@ canvas.addEventListener("touchstart",function(e){
 
 e.preventDefault();
 
-if(gameState==="game")action();
+if(gameState==="game")
+action();
 
 },{passive:false});
 
@@ -438,9 +441,11 @@ const ph=plane.height-margin*2;
 
 let topCanoHeight=gapY;
 
-if(px+pw>towerX && px<towerX+80 && py<topCanoHeight)gameOver=true;
+if(px+pw>towerX && px<towerX+80 && py<topCanoHeight)
+gameOver=true;
 
-if(px+pw>towerX && px<towerX+80 && py+ph>gapY+gapSize)gameOver=true;
+if(px+pw>towerX && px<towerX+80 && py+ph>gapY+gapSize)
+gameOver=true;
 
 }
 
@@ -453,10 +458,10 @@ if(paused)return;
 if(gameOver)return;
 
 plane.velocity+=gravity*delta;
-
 plane.y+=plane.velocity*delta;
 
-if(plane.y>=canvas.height-plane.height)gameOver=true;
+if(plane.y>=canvas.height-plane.height)
+gameOver=true;
 
 towerX-=speed*delta;
 
@@ -490,31 +495,23 @@ ctx.clearRect(0,0,canvas.width,canvas.height);
 ctx.drawImage(sky,0,0,canvas.width,canvas.height);
 
 for(let cloud of cloudList){
-
 ctx.drawImage(clouds[cloud.frame],cloud.x,cloud.y,120,70);
-
 }
 
 let stretchFactor=1.3;
 
 let topHeight=gapY*stretchFactor;
-
 let bottomHeight=(canvas.height-(gapY+gapSize))*stretchFactor;
 
 ctx.drawImage(pipeTop,towerX,0,80,topHeight);
-
 ctx.drawImage(pipeBottom,towerX,gapY+gapSize,80,bottomHeight);
 
 if(gameState==="game"||gameOver){
 
 if(plane.velocity>0){
-
 ctx.drawImage(fallImage,plane.x,plane.y,plane.width,plane.height);
-
 }else{
-
-ctx.drawImage(frames[currentFrame],plane.x,plane.y,plane.width,plane.height);
-
+ctx.drawImage(frames[0],plane.x,plane.y,plane.width,plane.height);
 }
 
 }
@@ -542,7 +539,6 @@ if(gameState==="menu"){
 
 ctx.fillStyle="black";
 ctx.font="30px Arial";
-
 ctx.fillText("Cat Sky Game",100,150);
 
 ctx.font="20px Arial";
@@ -574,7 +570,6 @@ ctx.fillText((menuOption===2?"> ":"")+"Back",140,380);
 
 ctx.fillStyle="black";
 ctx.font="16px Arial";
-
 ctx.fillText("P to pause",canvas.width-110,20);
 
 if(paused){
@@ -597,7 +592,6 @@ let delta=(time-lastTime)/16.67;
 lastTime=time;
 
 update(delta);
-
 draw();
 
 requestAnimationFrame(loop);
