@@ -40,20 +40,14 @@ const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 ctx.imageSmoothingEnabled = false;
 
-/* BACKGROUND */
-
 const sky = new Image();
 sky.src = "sky.png";
-
-/* CANOS */
 
 const pipeBottom = new Image();
 pipeBottom.src = "cano1.png";
 
 const pipeTop = new Image();
 pipeTop.src = "cano2.png";
-
-/* NUVENS */
 
 const clouds = [];
 
@@ -74,8 +68,6 @@ frame:Math.floor(Math.random()*clouds.length)
 });
 }
 
-/* PERSONAGEM */
-
 let plane={
 x:80,
 y:300,
@@ -87,19 +79,13 @@ velocity:0
 let gravity=0.25;
 let jump=-6;
 
-/* CANOS */
-
 let towerX=canvas.width;
 let gapSize=250;
 let gapY=Math.random()*(canvas.height-gapSize-200);
 let speed=2;
 
-/* SCORE */
-
 let score=0;
 let passed=false;
-
-/* ESTADO */
 
 let gameState="menu";
 let gameOver=false;
@@ -108,12 +94,8 @@ let jumpKey="Space";
 let waitingKey=false;
 let paused=false;
 
-/* VOLUME */
-
 let musicVolume=0.4;
 let sfxVolume=0.2;
-
-/* IMAGENS PERSONAGEM */
 
 const frames=[];
 
@@ -126,21 +108,15 @@ frames.push(img);
 const fallImage=new Image();
 fallImage.src="caindo.png";
 
-/* ANIMAÇÃO */
-
 let currentFrame=0;
 let frameTimer=0;
 let frameSpeed=5;
-
-/* ÁUDIO */
 
 const backgroundMusic=document.getElementById("backgroundMusic");
 backgroundMusic.volume=musicVolume;
 
 const jumpSound=document.getElementById("jumpSound");
 jumpSound.volume=sfxVolume;
-
-/* INPUT */
 
 function action(){
 
@@ -165,12 +141,11 @@ return;
 }
 
 plane.velocity=jump;
+
 jumpSound.currentTime=0;
-jumpSound.play();
+jumpSound.play().catch(()=>{});
 
 }
-
-/* TECLADO */
 
 document.addEventListener("keydown",function(e){
 
@@ -237,18 +212,12 @@ action();
 
 });
 
-/* MOUSE */
-
 canvas.addEventListener("mousedown",action);
-
-/* TOUCH */
 
 canvas.addEventListener("touchstart",function(e){
 e.preventDefault();
 action();
 },{passive:false});
-
-/* RESET */
 
 function resetGame(){
 
@@ -263,8 +232,6 @@ passed=false;
 gameOver=false;
 
 }
-
-/* COLISÃO */
 
 function checkCollision(){
 
@@ -295,8 +262,6 @@ gameOver=true;
 
 }
 
-/* UPDATE */
-
 function update(delta){
 
 if(gameState!=="game") return;
@@ -325,8 +290,6 @@ passed=true;
 
 checkCollision();
 
-/* ANIMAÇÃO */
-
 if(plane.velocity<0){
 
 frameTimer+=delta;
@@ -342,8 +305,6 @@ currentFrame=0;
 }
 
 }
-
-/* NUVENS */
 
 for(let cloud of cloudList){
 
@@ -361,23 +322,15 @@ cloud.frame=Math.floor(Math.random()*clouds.length);
 
 }
 
-/* DESENHO */
-
 function draw(){
 
 ctx.clearRect(0,0,canvas.width,canvas.height);
 
-/* CÉU */
-
 ctx.drawImage(sky,0,0,canvas.width,canvas.height);
-
-/* NUVENS */
 
 for(let cloud of cloudList){
 ctx.drawImage(clouds[cloud.frame],cloud.x,cloud.y,120,70);
 }
-
-/* CANOS */
 
 let stretchFactor=1.3;
 
@@ -389,8 +342,6 @@ bottomHeight=Math.min(bottomHeight,canvas.height-(gapY+gapSize));
 ctx.drawImage(pipeTop,towerX,0,80,topHeight);
 ctx.drawImage(pipeBottom,towerX,gapY+gapSize,80,bottomHeight);
 
-/* PERSONAGEM */
-
 if(gameState==="game" || gameOver){
 
 if(plane.velocity>0){
@@ -401,8 +352,6 @@ ctx.drawImage(frames[currentFrame],plane.x,plane.y,plane.width,plane.height);
 
 }
 
-/* SCORE */
-
 if(gameState==="game"){
 
 ctx.fillStyle="black";
@@ -410,8 +359,6 @@ ctx.font="24px Arial";
 ctx.fillText("Score: "+score,10,30);
 
 }
-
-/* GAME OVER */
 
 if(gameOver){
 
@@ -423,8 +370,6 @@ ctx.font="20px Arial";
 ctx.fillText("Press Jump to Restart",90,340);
 
 }
-
-/* MENU */
 
 if(gameState==="menu"){
 
@@ -460,8 +405,6 @@ ctx.fillText("Press a new key...",110,460);
 
 }
 
-/* PAUSE */
-
 ctx.fillStyle="black";
 ctx.font="16px Arial";
 ctx.fillText("P to pause",canvas.width-110,20);
@@ -472,8 +415,6 @@ ctx.fillText("Paused",130,300);
 }
 
 }
-
-/* LOOP */
 
 let lastTime=0;
 
