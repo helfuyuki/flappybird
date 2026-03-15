@@ -122,32 +122,27 @@ backgroundMusic.volume=musicVolume;
 
 /* SOM DO PULO */
 
-const jumpSounds=[];
-for(let i=0;i<4;i++){
-let s=new Audio("jump.mp3");
-s.volume=sfxVolume;
-jumpSounds.push(s);
+/* SON DO PULO */
+const jumpSounds = [];
+for (let i = 0; i < 4; i++) {
+    let s = new Audio("jump.mp3");
+    s.volume = sfxVolume;
+    jumpSounds.push(s);
 }
-
-let jumpIndex=0;
-let lastJumpSound=0;
-const jumpSoundDelay=250;
-
-function playJump(){
-
-let now=Date.now();
-if(now-lastJumpSound<jumpSoundDelay)return;
-lastJumpSound=now;
-
-let s=jumpSounds[jumpIndex];
-s.currentTime=0;
-s.play().catch(()=>{});
-
-jumpIndex++;
-if(jumpIndex>=jumpSounds.length){
-jumpIndex=0;
-}
-
+let jumpIndex = 0;
+let lastJumpSoundTime = 0; // Armazena o tempo do último som do pulo
+const jumpSoundDelay = 250; // Delay em milissegundos
+function playJump() {
+    let now = Date.now();
+    if (now - lastJumpSoundTime < jumpSoundDelay) return; // Impede o tocamento rápido
+    lastJumpSoundTime = now; // Atualiza o tempo do último som
+    let s = jumpSounds[jumpIndex];
+    s.currentTime = 0; // Reinicia o som
+    s.play().catch(() => {}); // Toca o som
+    jumpIndex++; // Incrementa o índice para o próximo som
+    if (jumpIndex >= jumpSounds.length) {
+        jumpIndex = 0; // Reseta o índice se ultrapassar o limite
+    }
 }
 
 const frames=[];
