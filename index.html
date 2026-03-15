@@ -1,334 +1,639 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cat Game</title>
-    <style>
-        body {
-            margin: 0;
-            background: #191970; /* Cor de fundo */
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        canvas {
-            background: white;
-            border: 2px solid black;
-            width: 85vw;
-            max-width: 420px;
-            height: auto;
-            touch-action: none;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cat Game</title>
+
+<style>
+
+body{
+margin:0;
+background:#191970;
+overflow:hidden;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+
+canvas{
+background:white;
+border:2px solid black;
+width:85vw;
+max-width:420px;
+height:auto;
+touch-action:none;
+}
+
+/* CONTROLES MOBILE */
+
+#mobileMenuControls{
+margin-top:12px;
+display:flex;
+flex-direction:column;
+gap:8px;
+align-items:center;
+}
+
+#mobileMenuControls button{
+width:60px;
+height:60px;
+font-size:28px;
+border:none;
+border-radius:12px;
+background:white;
+box-shadow:0 4px 8px rgba(0,0,0,0.3);
+}
+
+#mobileMenuControls button:active{
+transform:scale(0.95);
+}
+
+</style>
 </head>
+
 <body>
-    <canvas id="game" width="400" height="800"></canvas>
-    <audio id="backgroundMusic" src="playlist.mp3" loop></audio>
-    <audio id="jumpSound" src="jump.mp3"></audio>
-    <audio id="menuMusic" src="kitty.mp3" loop></audio>
-    <script>
-        const canvas = document.getElementById("game");
-        const ctx = canvas.getContext("2d");
-        ctx.imageSmoothingEnabled = false;
-        /* BACKGROUND */
-        const sky = new Image();
-        sky.src = "sky.png";
-        /* CANOS */
-        const pipeBottom = new Image();
-        pipeBottom.src = "cano1.png";
-        const pipeTop = new Image();
-        pipeTop.src = "cano2.png";
-        /* NUVENS */
-        const clouds = [];
-        for (let i = 1; i <= 3; i++) {
-            let img = new Image();
-            img.src = "cloud" + i + ".png";
-            clouds.push(img);
-        }
-        let cloudList = [];
-        for (let i = 0; i < 8; i++) {
-            cloudList.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * 300,
-                speed: 1 + Math.random() * 0.6,
-                frame: Math.floor(Math.random() * clouds.length)
-            });
-        }
-        /* PERSONAGEM */
-        let plane = {
-            x: 80,
-            y: 300,
-            width: 80,
-            height: 80,
-            velocity: 0
-        };
-        let gravity = 0.25;
-        let jump = -6;
-        /* CANOS */
-        let towerX = canvas.width;
-        let gapSize = 250; // Aumentar o tamanho do espaço
-        let gapY = Math.random() * (canvas.height - gapSize - 200);
-        let speed = 2;
-        /* SCORE */
-        let score = 0;
-        let passed = false;
-        /* ESTADO */
-        let gameState = "menu"; // Estado inicial
-        let gameOver = false;
-        let menuOption = 0;
-        let jumpKey = "Space";
-        let waitingKey = false;
-        let paused = false;
-        /* IMAGENS PERSONAGEM */
-        const frames = [];
-        for (let i = 1; i <= 5; i++) {
-            let img = new Image();
-            img.src = "frame" + i + ".png";
-            frames.push(img);
-        }
-        const fallImage = new Image();
-        fallImage.src = "caindo.png";
-        /* ANIMAÇÃO */
-        let currentFrame = 0;
-        let frameTimer = 0;
-        let frameSpeed = 5;
-        /* INICIALIZAÇÃO DA MÚSICA */
-        const backgroundMusic = document.getElementById('backgroundMusic');
-        backgroundMusic.volume = 0.3; // Ajustado para 30% do volume
-        /* INICIALIZAÇÃO DO SOM DO PULO */
-        const jumpSounds = [];
-        for (let i = 0; i < 4; i++) {
-            let s = new Audio("jump.mp3"); // Se precisa ter múltiplos sons
-            s.volume = 0.2; // Ajustado para 20% do volume
-            jumpSounds.push(s);
-        }
-        let jumpIndex = 0;
-        let isJumpSoundPlaying = false; // Controla o som do pulo
-        function playJump() {
-            if (isJumpSoundPlaying) return; // Evitar tocar rapidamente
-            isJumpSoundPlaying = true; // Marcar que o som está tocando
-            let s = jumpSounds[jumpIndex]; // Pega o som atual
-            s.currentTime = 0; // Reinicia o som
-            s.play().then(() => {
-                s.onended = () => {
-                    isJumpSoundPlaying = false; // A música parou, permite tocar novamente
-                };
-            }).catch(error => {
-                console.error("Erro ao tocar o som do pulo:", error);
-                isJumpSoundPlaying = false; // Reseta para permitir a próxima reprodução
-            });
-            jumpIndex++;
-            if (jumpIndex >= jumpSounds.length) {
-                jumpIndex = 0; // Reinicia o índice
-            }
-        }
-        /* MÚSICA DO MENU */
-        const menuMusic = document.getElementById('menuMusic');
-        menuMusic.volume = 0.5; // Ajustado para 50% do volume
-        function playMenuMusic() {
-            menuMusic.play().catch(error => {
-                console.error("Erro ao tentar tocar a música do menu:", error);
-            });
-        }
-        function stopMenuMusic() {
-            menuMusic.pause();
-            menuMusic.currentTime = 0; // Retorna ao início
-        }
-        function action() {
-            if (gameState === "menu") {
-                if (menuOption === 0) {
-                    gameState = "game";
-                    resetGame();
-                    stopMenuMusic(); // Para a música do menu quando o jogo começa
-                    backgroundMusic.play(); // Inicie a música do jogo
-                }
-                if (menuOption === 1) {
-                    waitingKey = true;
-                }
-                return;
-            }
-            if (gameOver) {
-                resetGame();
-                return;
-            }
-            plane.velocity = jump;
-            playJump(); // Reproduzir o som do pulo
-        }
-        /* TECLADO */
-        document.addEventListener("keydown", function(e) {
-            if (e.code === "KeyP" && gameState === "game" && !gameOver) {
-                paused = !paused;
-            }
-            if (gameState === "menu") {
-                if (waitingKey) {
-                    jumpKey = e.code;
-                    waitingKey = false;
-                    return;
-                }
-                if (e.code === "ArrowUp") menuOption--;
-                if (e.code === "ArrowDown") menuOption++;
-                if (menuOption < 0) menuOption = 2; // Ajustar conforme opções
-                if (menuOption > 2) menuOption = 0; // Ajustar conforme opções
-                if (e.code === "Enter") {
-                    action();
-                }
-                return;
-            }
-            if (e.code === jumpKey) {
-                action();
-            }
-        });
-        /* MOUSE e TOQUE */
-        canvas.addEventListener("mousedown", function() {
-            if (gameState === "menu") {
-                playMenuMusic(); // Tocar a música do menu no clique
-            }
-            action(); // Chama a ação geral
-        });
-        canvas.addEventListener("touchstart", function(e) {
-            e.preventDefault();
-            if (gameState === "menu") {
-                playMenuMusic(); // Tocar a música do menu no toque
-            }
-            action(); // Chama a ação geral
-        }, { passive: false });
-        /* RESET */
-        function resetGame() {
-            plane.y = 300;
-            plane.velocity = 0;
-            towerX = canvas.width;
-            gapY = Math.random() * (canvas.height - gapSize - 200);
-            score = 0; 
-            passed = false;
-            gameOver = false;
-        }
-        /* COLISÃO */
-        function checkCollision() {
-            const margin = 12;
-            const px = plane.x + margin;
-            const py = plane.y + margin;
-            const pw = plane.width - margin * 2;
-            const ph = plane.height - margin * 2;
-            let topCanoHeight = gapY; // Altura do cano de cima
-            if (
-                px + pw > towerX &&
-                px < towerX + 80 &&
-                (py < topCanoHeight) // Verifica se passou para cima
-            ) {
-                gameOver = true;
-            }
-            if (
-                px + pw > towerX &&
-                px < towerX + 80 &&
-                (py + ph > gapY + gapSize) // Verifica se passou por baixo
-            ) {
-                gameOver = true;
-            }
-        }
-        /* UPDATE */
-        function update(delta) {
-            if (gameState !== "game") return; // Atualiza somente durante o jogo
-            if (paused) return;
-            if (gameOver) return;
-            plane.velocity += gravity * delta;
-            plane.y += plane.velocity * delta;
-            if (plane.y >= canvas.height - plane.height) {
-                gameOver = true;
-            }
-            towerX -= speed * delta;
-            if (towerX < -80) {
-                towerX = canvas.width;
-                gapY = Math.random() * (canvas.height - gapSize - 200); // Reserve um espaço extra
-                passed = false;
-            }
-            if (towerX + 80 < plane.x && !passed) {
-                score++;
-                passed = true;
-            }
-            checkCollision();
-            if (plane.velocity < 0) {
-                frameTimer += delta;
-                if (frameTimer >= frameSpeed) {
-                    frameTimer = 0;
-                    currentFrame++;
-                    if (currentFrame >= frames.length) {
-                        currentFrame = 0;
-                    }
-                }
-            }
-            // Atualiza as nuvens
-            for (let cloud of cloudList) {
-                cloud.x -= cloud.speed * delta;
-                if (cloud.x < -150) {
-                    cloud.x = canvas.width + Math.random() * 200;
-                    cloud.y = Math.random() * 300;
-                    cloud.frame = Math.floor(Math.random() * clouds.length);
-                }
-            }
-        }
-        /* DESENHO */
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(sky, 0, 0, canvas.width, canvas.height);
-            for (let cloud of cloudList) {
-                ctx.drawImage(clouds[cloud.frame], cloud.x, cloud.y, 120, 70);
-            }
-            let stretchFactor = 1.3; // 30% maior
-            let topHeight = gapY * stretchFactor;
-            let bottomHeight = (canvas.height - (gapY + gapSize)) * stretchFactor;
-            bottomHeight = Math.min(bottomHeight, canvas.height - (gapY + gapSize));
-            ctx.drawImage(pipeTop, towerX, 0, 80, topHeight);
-            ctx.drawImage(pipeBottom, towerX, gapY + gapSize, 80, bottomHeight);
-            if (gameState === "game" || gameOver) {
-                if (plane.velocity > 0) {
-                    ctx.drawImage(fallImage, plane.x, plane.y, plane.width, plane.height);
-                } else {
-                    ctx.drawImage(frames[currentFrame], plane.x, plane.y, plane.width, plane.height);
-                }
-            }
-            if (gameState === "game") {
-                ctx.fillStyle = "black";
-                ctx.font = "24px Arial";
-                ctx.fillText("Score: " + score, 10, 30);
-            }
-            if (gameOver) {
-                ctx.fillStyle = "black";
-                ctx.font = "40px Arial";
-                ctx.fillText("Game Over", 110, 300);
-                ctx.font = "20px Arial";
-                ctx.fillText("Press Jump to Restart", 90, 340);
-            }
-            if (gameState === "menu") {
-                ctx.fillStyle = "black";
-                ctx.font = "30px Arial";
-                ctx.fillText("Cat Sky Game", 100, 150);
-                ctx.font = "20px Arial";
-                ctx.fillText((menuOption === 0 ? "> " : "") + "Start Game", 130, 250);
-                ctx.fillText((menuOption === 1 ? "> " : "") + "Controls", 130, 300);
-                ctx.fillText((menuOption === 2 ? "> " : "") + "Audio", 130, 350);
-            }
-            ctx.fillStyle = "black";
-            ctx.font = "16px Arial";
-            ctx.fillText("P to pause", canvas.width - 110, 20);
-            if (paused) {
-                ctx.font = "40px Arial";
-                ctx.fillText("Paused", 130, 300);
-            }
-        }
-        /* LOOP */
-        let lastTime = 0;
-        function loop(time) {
-            let delta = (time - lastTime) / 16.67;
-            lastTime = time;
-            update(delta);
-            draw();
-            requestAnimationFrame(loop);
-        }
-        // Começa o loop do jogo
-        requestAnimationFrame(loop);
-    </script>
+
+<canvas id="game" width="400" height="800"></canvas>
+
+<div id="mobileMenuControls">
+<button id="upBtn">▲</button>
+<button id="downBtn">▼</button>
+</div>
+
+<audio id="backgroundMusic" src="playlist.mp3" loop></audio>
+<audio id="menuMusic" src="kitty.mp3" loop></audio>
+
+<script>
+
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+ctx.imageSmoothingEnabled = false;
+
+/* BACKGROUND */
+
+const sky = new Image();
+sky.src = "sky.png";
+
+/* CANOS */
+
+const pipeBottom = new Image();
+pipeBottom.src = "cano1.png";
+
+const pipeTop = new Image();
+pipeTop.src = "cano2.png";
+
+/* NUVENS */
+
+const clouds = [];
+
+for(let i=1;i<=3;i++){
+
+let img = new Image();
+
+img.src = "cloud"+i+".png";
+
+clouds.push(img);
+
+}
+
+let cloudList = [];
+
+for(let i=0;i<8;i++){
+
+cloudList.push({
+
+x:Math.random()*canvas.width,
+
+y:Math.random()*300,
+
+speed:1+Math.random()*0.6,
+
+frame:Math.floor(Math.random()*clouds.length)
+
+});
+
+}
+
+/* PERSONAGEM */
+
+let plane={
+
+x:80,
+
+y:300,
+
+width:80,
+
+height:80,
+
+velocity:0
+
+};
+
+let gravity=0.25;
+
+let jump=-6;
+
+/* CANOS */
+
+let towerX=canvas.width;
+
+let gapSize=250;
+
+let gapY=Math.random()*(canvas.height-gapSize-200);
+
+let speed=2;
+
+/* SCORE */
+
+let score=0;
+
+let passed=false;
+
+/* ESTADO */
+
+let gameState="menu";
+
+let gameOver=false;
+
+let menuOption=0;
+
+let jumpKey="Space";
+
+let waitingKey=false;
+
+let paused=false;
+
+/* PERSONAGEM FRAMES */
+
+const frames=[];
+
+for(let i=1;i<=5;i++){
+
+let img=new Image();
+
+img.src="frame"+i+".png";
+
+frames.push(img);
+
+}
+
+const fallImage=new Image();
+
+fallImage.src="caindo.png";
+
+/* ANIMAÇÃO */
+
+let currentFrame=0;
+
+let frameTimer=0;
+
+let frameSpeed=5;
+
+/* ÁUDIO */
+
+const backgroundMusic=document.getElementById("backgroundMusic");
+
+backgroundMusic.volume=0.3;
+
+const menuMusic=document.getElementById("menuMusic");
+
+menuMusic.volume=0.5;
+
+/* SOM DO PULO */
+
+const jumpSounds=[];
+
+for(let i=0;i<4;i++){
+
+let s=new Audio("jump.mp3");
+
+s.volume=0.2;
+
+jumpSounds.push(s);
+
+}
+
+let jumpIndex=0;
+
+let jumpCooldown=0;
+
+function playJump(){
+
+if(jumpCooldown>0)return;
+
+let s=jumpSounds[jumpIndex];
+
+s.currentTime=0;
+
+s.play().catch(()=>{});
+
+jumpIndex++;
+
+if(jumpIndex>=jumpSounds.length)jumpIndex=0;
+
+jumpCooldown=6;
+
+}
+
+/* MENU MUSIC */
+
+function playMenuMusic(){
+
+menuMusic.play().catch(()=>{});
+
+}
+
+function stopMenuMusic(){
+
+menuMusic.pause();
+
+menuMusic.currentTime=0;
+
+}
+
+/* AÇÃO */
+
+function action(){
+
+if(gameState==="menu"){
+
+if(menuOption===0){
+
+gameState="game";
+
+resetGame();
+
+stopMenuMusic();
+
+backgroundMusic.play();
+
+}
+
+if(menuOption===1){
+
+waitingKey=true;
+
+}
+
+return;
+
+}
+
+if(gameOver){
+
+resetGame();
+
+return;
+
+}
+
+plane.velocity=jump;
+
+playJump();
+
+}
+
+/* TECLADO */
+
+document.addEventListener("keydown",function(e){
+
+if(e.code==="KeyP" && gameState==="game" && !gameOver){
+
+paused=!paused;
+
+}
+
+if(gameState==="menu"){
+
+if(waitingKey){
+
+jumpKey=e.code;
+
+waitingKey=false;
+
+return;
+
+}
+
+if(e.code==="ArrowUp")menuOption--;
+
+if(e.code==="ArrowDown")menuOption++;
+
+if(menuOption<0)menuOption=2;
+
+if(menuOption>2)menuOption=0;
+
+if(e.code==="Enter")action();
+
+return;
+
+}
+
+if(e.code===jumpKey){
+
+action();
+
+}
+
+});
+
+/* TOQUE */
+
+canvas.addEventListener("touchstart",function(e){
+
+e.preventDefault();
+
+if(gameState==="menu"){
+
+playMenuMusic();
+
+}
+
+action();
+
+},{passive:false});
+
+/* RESET */
+
+function resetGame(){
+
+plane.y=300;
+
+plane.velocity=0;
+
+towerX=canvas.width;
+
+gapY=Math.random()*(canvas.height-gapSize-200);
+
+score=0;
+
+passed=false;
+
+gameOver=false;
+
+}
+
+/* COLISÃO */
+
+function checkCollision(){
+
+const margin=12;
+
+const px=plane.x+margin;
+
+const py=plane.y+margin;
+
+const pw=plane.width-margin*2;
+
+const ph=plane.height-margin*2;
+
+if(
+
+px+pw>towerX &&
+
+px<towerX+80 &&
+
+(py<gapY || py+ph>gapY+gapSize)
+
+){
+
+gameOver=true;
+
+}
+
+}
+
+/* UPDATE */
+
+function update(delta){
+
+if(jumpCooldown>0)jumpCooldown-=delta;
+
+if(gameState!=="game")return;
+
+if(paused)return;
+
+if(gameOver)return;
+
+plane.velocity+=gravity*delta;
+
+plane.y+=plane.velocity*delta;
+
+if(plane.y>=canvas.height-plane.height){
+
+gameOver=true;
+
+}
+
+towerX-=speed*delta;
+
+if(towerX<-80){
+
+towerX=canvas.width;
+
+gapY=Math.random()*(canvas.height-gapSize-200);
+
+passed=false;
+
+}
+
+if(towerX+80<plane.x && !passed){
+
+score++;
+
+passed=true;
+
+}
+
+checkCollision();
+
+if(plane.velocity<0){
+
+frameTimer+=delta;
+
+if(frameTimer>=frameSpeed){
+
+frameTimer=0;
+
+currentFrame++;
+
+if(currentFrame>=frames.length)currentFrame=0;
+
+}
+
+}
+
+for(let cloud of cloudList){
+
+cloud.x-=cloud.speed*delta;
+
+if(cloud.x<-150){
+
+cloud.x=canvas.width+Math.random()*200;
+
+cloud.y=Math.random()*300;
+
+cloud.frame=Math.floor(Math.random()*clouds.length);
+
+}
+
+}
+
+}
+
+/* DESENHO */
+
+function draw(){
+
+ctx.clearRect(0,0,canvas.width,canvas.height);
+
+ctx.drawImage(sky,0,0,canvas.width,canvas.height);
+
+for(let cloud of cloudList){
+
+ctx.drawImage(clouds[cloud.frame],cloud.x,cloud.y,120,70);
+
+}
+
+let stretchFactor=1.3;
+
+let topHeight=gapY*stretchFactor;
+
+let bottomHeight=(canvas.height-(gapY+gapSize))*stretchFactor;
+
+bottomHeight=Math.min(bottomHeight,canvas.height-(gapY+gapSize));
+
+ctx.drawImage(pipeTop,towerX,0,80,topHeight);
+
+ctx.drawImage(pipeBottom,towerX,gapY+gapSize,80,bottomHeight);
+
+if(gameState==="game"||gameOver){
+
+if(plane.velocity>0){
+
+ctx.drawImage(fallImage,plane.x,plane.y,plane.width,plane.height);
+
+}else{
+
+ctx.drawImage(frames[currentFrame],plane.x,plane.y,plane.width,plane.height);
+
+}
+
+}
+
+if(gameState==="game"){
+
+ctx.fillStyle="black";
+
+ctx.font="24px Arial";
+
+ctx.fillText("Score: "+score,10,30);
+
+}
+
+if(gameOver){
+
+ctx.fillStyle="black";
+
+ctx.font="40px Arial";
+
+ctx.fillText("Game Over",110,300);
+
+ctx.font="20px Arial";
+
+ctx.fillText("Press Jump to Restart",90,340);
+
+}
+
+if(gameState==="menu"){
+
+ctx.fillStyle="black";
+
+ctx.font="30px Arial";
+
+ctx.fillText("Cat Sky Game",100,150);
+
+ctx.font="20px Arial";
+
+ctx.fillText((menuOption===0?"> ":"")+"Start Game",130,250);
+
+ctx.fillText((menuOption===1?"> ":"")+"Controls",130,300);
+
+ctx.fillText((menuOption===2?"> ":"")+"Audio",130,350);
+
+}
+
+ctx.fillStyle="black";
+
+ctx.font="16px Arial";
+
+ctx.fillText("P to pause",canvas.width-110,20);
+
+if(paused){
+
+ctx.font="40px Arial";
+
+ctx.fillText("Paused",130,300);
+
+}
+
+}
+
+/* LOOP */
+
+let lastTime=0;
+
+function loop(time){
+
+let delta=(time-lastTime)/16.67;
+
+lastTime=time;
+
+update(delta);
+
+draw();
+
+requestAnimationFrame(loop);
+
+}
+
+requestAnimationFrame(loop);
+
+/* BOTÕES MOBILE */
+
+const upBtn=document.getElementById("upBtn");
+
+const downBtn=document.getElementById("downBtn");
+
+upBtn.onclick=()=>{
+
+if(gameState==="menu"){
+
+menuOption--;
+
+if(menuOption<0)menuOption=2;
+
+}
+
+};
+
+downBtn.onclick=()=>{
+
+if(gameState==="menu"){
+
+menuOption++;
+
+if(menuOption>2)menuOption=0;
+
+}
+
+};
+
+</script>
 </body>
 </html>
