@@ -120,25 +120,34 @@ let sfxVolume=0.2;
 const backgroundMusic=document.getElementById("backgroundMusic");
 backgroundMusic.volume=musicVolume;
 
-/* POOL DE SOM DO PULO */
+/* SOM DO PULO */
 
 const jumpSounds=[];
-for(let i=0;i<5;i++){
+for(let i=0;i<4;i++){
 let s=new Audio("jump.mp3");
 s.volume=sfxVolume;
 jumpSounds.push(s);
 }
 
 let jumpIndex=0;
+let lastJumpSound=0;
+const jumpSoundDelay=120;
 
 function playJump(){
+
+let now=Date.now();
+if(now-lastJumpSound<jumpSoundDelay)return;
+lastJumpSound=now;
+
 let s=jumpSounds[jumpIndex];
 s.currentTime=0;
 s.play().catch(()=>{});
+
 jumpIndex++;
 if(jumpIndex>=jumpSounds.length){
 jumpIndex=0;
 }
+
 }
 
 const frames=[];
