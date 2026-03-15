@@ -9,7 +9,7 @@
 
 body{
 margin:0;
-background:#191970;
+background:#191970; 
 overflow:hidden;
 display:flex;
 justify-content:center;
@@ -169,7 +169,7 @@ frames.push(img);
 const fallImage=new Image();
 fallImage.src="caindo.png";
 
-/* ANIMAÇÃO */
+/* VARIÁVEIS DA ANIMAÇÃO */
 
 let frameIndex=0;
 let frameTimer=0;
@@ -185,39 +185,42 @@ menuMusic.volume=0.5;
 
 /* SOM DO PULO */
 
-const jumpSounds=[];
-for(let i=0;i<4;i++){
-let s=new Audio("jump.mp3");
-s.volume=sfxVolume;
-jumpSounds.push(s);
+const jumpSounds = [];
+for (let i = 0; i < 4; i++) {
+    let s = new Audio("jump.mp3");
+    s.volume = sfxVolume;
+    jumpSounds.push(s);
 }
+let jumpIndex = 0;
+let isJumpSoundPlaying = false;
 
-let jumpIndex=0;
-let isJumpSoundPlaying=false;
+function playJump() {
 
-function playJump(){
+    if (isJumpSoundPlaying) return;
 
-if(isJumpSoundPlaying)return;
+    isJumpSoundPlaying = true;
 
-isJumpSoundPlaying=true;
+    let s = jumpSounds[jumpIndex];
 
-let s=jumpSounds[jumpIndex];
+    s.currentTime = 0;
 
-s.currentTime=0;
+    s.play().then(() => {
 
-s.play().then(()=>{
-s.onended=function(){
-isJumpSoundPlaying=false;
-};
-}).catch(()=>{
-isJumpSoundPlaying=false;
-});
+        s.onended = () => {
+            isJumpSoundPlaying = false;
+        };
 
-jumpIndex++;
+    }).catch(() => {
 
-if(jumpIndex>=jumpSounds.length)
-jumpIndex=0;
+        isJumpSoundPlaying = false;
 
+    });
+
+    jumpIndex++;
+
+    if (jumpIndex >= jumpSounds.length) {
+        jumpIndex = 0;
+    }
 }
 
 /* MENU MUSIC */
@@ -405,45 +408,6 @@ action();
 
 });
 
-/* BOTÕES MOBILE */
-
-document.getElementById("btnUp").onclick=moveUp;
-document.getElementById("btnDown").onclick=moveDown;
-document.getElementById("btnA").onclick=action;
-
-document.getElementById("btnLeft").onclick=function(){
-
-if(menuPage==="audio"){
-
-if(menuOption===0)adjustMusicVolume(-0.05);
-if(menuOption===1)adjustSFXVolume(-0.05);
-
-}
-
-};
-
-document.getElementById("btnRight").onclick=function(){
-
-if(menuPage==="audio"){
-
-if(menuOption===0)adjustMusicVolume(0.05);
-if(menuOption===1)adjustSFXVolume(0.05);
-
-}
-
-};
-
-/* TOUCH */
-
-canvas.addEventListener("touchstart",function(e){
-
-e.preventDefault();
-
-if(gameState==="game")
-action();
-
-},{passive:false});
-
 /* RESET */
 
 function resetGame(){
@@ -489,6 +453,21 @@ function update(delta){
 if(gameState!=="game")return;
 if(paused)return;
 if(gameOver)return;
+
+/* ANIMAÇÃO DAS NUVENS */
+
+for(let cloud of cloudList){
+
+cloud.x-=cloud.speed*delta;
+
+if(cloud.x<-150){
+
+cloud.x=canvas.width+Math.random()*100;
+cloud.y=Math.random()*300;
+
+}
+
+}
 
 plane.velocity+=gravity*delta;
 plane.y+=plane.velocity*delta;
@@ -562,69 +541,6 @@ frameIndex=0;
 ctx.drawImage(frames[frameIndex],plane.x,plane.y,plane.width,plane.height);
 
 }
-
-}
-
-if(gameState==="game"){
-
-ctx.fillStyle="black";
-ctx.font="24px Arial";
-ctx.fillText("Score: "+score,10,30);
-
-}
-
-if(gameOver){
-
-ctx.fillStyle="black";
-ctx.font="40px Arial";
-ctx.fillText("Game Over",110,300);
-
-ctx.font="20px Arial";
-ctx.fillText("Press Jump to Restart",90,340);
-
-}
-
-if(gameState==="menu"){
-
-ctx.fillStyle="black";
-ctx.font="30px Arial";
-ctx.fillText("Cat Sky Game",100,150);
-
-ctx.font="20px Arial";
-
-if(menuPage==="main"){
-
-ctx.fillText((menuOption===0?"> ":"")+"Start Game",130,250);
-ctx.fillText((menuOption===1?"> ":"")+"Controls",130,300);
-ctx.fillText((menuOption===2?"> ":"")+"Audio",130,350);
-
-}
-
-if(menuPage==="controls"){
-
-ctx.fillText((menuOption===0?"> ":"")+"Jump Key: "+jumpKey,100,260);
-ctx.fillText((menuOption===1?"> ":"")+"Back",130,320);
-
-}
-
-if(menuPage==="audio"){
-
-ctx.fillText((menuOption===0?"> ":"")+"Music Volume: "+Math.round(musicVolume*100),90,260);
-ctx.fillText((menuOption===1?"> ":"")+"SFX Volume: "+Math.round(sfxVolume*100),100,320);
-ctx.fillText((menuOption===2?"> ":"")+"Back",140,380);
-
-}
-
-}
-
-ctx.fillStyle="black";
-ctx.font="16px Arial";
-ctx.fillText("P to pause",canvas.width-110,20);
-
-if(paused){
-
-ctx.font="40px Arial";
-ctx.fillText("Paused",130,300);
 
 }
 
