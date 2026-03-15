@@ -10,11 +10,11 @@
 body{
 margin:0;
 background:#191970;
-overflow:hidden;
 display:flex;
+flex-direction:column;
 justify-content:center;
 align-items:center;
-height:100vh;
+min-height:100vh;
 position:relative;
 }
 
@@ -28,10 +28,11 @@ touch-action:none;
 }
 
 #ui{
-position:absolute;
-bottom:20px;
+margin-top:10px;
 display:flex;
 gap:10px;
+flex-wrap:wrap;
+justify-content:center;
 }
 
 button{
