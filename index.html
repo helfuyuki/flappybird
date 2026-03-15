@@ -49,6 +49,9 @@
     <div id="ui">
         <button id="btnUp">▲</button>
         <button id="btnDown">▼</button>
+        <button id="btnLeft">◀</button>
+        <button id="btnRight">▶</button>
+        <button id="btnA">OK</button>
     </div>
     <audio id="backgroundMusic" src="playlist.mp3" loop></audio>
     <audio id="jumpSound" src="jump.mp3"></audio>
@@ -102,8 +105,8 @@
         /* ESTADO */
         let gameState = "menu"; // Estado inicial
         let gameOver = false;
-        let menuOption = 0;
-        let jumpKey = "Space";
+        let menuOption = 0; // Para rastrear a opção do menu selecionada
+        let jumpKey = "Space"; // Tecla de pulo padrão
         let waitingKey = false;
         let paused = false;
         let menuPage = "main"; // Para gerenciar páginas de menu
@@ -125,7 +128,8 @@
         /* INICIALIZAÇÃO DA MÚSICA */
         const backgroundMusic = document.getElementById('backgroundMusic');
         backgroundMusic.volume = musicVolume; // Volume da música de fundo
-        const jumpSounds = []; // Array para sons de pulo
+        /* INICIALIZAÇÃO DO SOM DO PULO */
+        const jumpSounds = [];
         for (let i = 0; i < 4; i++) {
             let s = new Audio("jump.mp3");
             s.volume = sfxVolume; // Ajustar volume do efeito sonoro
@@ -151,7 +155,7 @@
                 jumpIndex = 0; // Reseta o índice
             }
         }
-        // MÚSICA DO MENU
+        /* INICIALIZAÇÃO DA MÚSICA DO MENU */
         const menuMusic = document.getElementById('menuMusic');
         menuMusic.volume = 0.5; // Ajuste do volume da música do menu
         function playMenuMusic() {
@@ -188,63 +192,40 @@
             plane.velocity = jump;
             playJump(); // Tocar o som do pulo
         }
+        /* FUNÇÕES DE NAVEGAÇÃO DO MENU */
+        function moveUp() {
+            if (gameState === "menu") {
+                menuOption--;
+                if (menuOption < 0) {
+                    menuOption = 2; // Ajuste conforme suas opções
+                }
+                playMenuMusic(); // Tocar a música do menu ao mudar opção
+            }
+        }
+        function moveDown() {
+            if (gameState === "menu") {
+                menuOption++;
+                if (menuOption > 2) {
+                    menuOption = 0; // Ajuste conforme suas opções
+                }
+                playMenuMusic(); // Tocar a música do menu ao mudar opção
+            }
+        }
         /* TECLADO */
         document.addEventListener("keydown", function (e) {
             if (e.code === "KeyP" && gameState === "game" && !gameOver) {
                 paused = !paused;
             }
-            if (gameState === "menu") {
-                if (menuPage === "main") {
-                    if (waitingKey) {
-                        jumpKey = e.code;
-                        waitingKey = false;
-                        return;
-                    }
-                    if (e.code === "ArrowUp") {
-                        menuOption--;
-                        if (menuOption < 0) menuOption = 2; // Ajuste o número de opções
-                    }
-                    if (e.code === "ArrowDown") {
-                        menuOption++;
-                        if (menuOption > 2) menuOption = 0; // Ajuste o número de opções
-                    }
-                    if (e.code === "Enter") {
-                        action();
-                    }
-                }
-                if (menuPage === "controls" && e.code === "ArrowDown") {
-                    menuOption++;
-                    if (menuOption > 1) menuOption = 0; // Ajuste o número de opções em "controls"
-                }
-                if (menuPage === "audio" && e.code === "ArrowDown") {
-                    menuOption++;
-                    if (menuOption > 2) menuOption = 0; // Ajuste o número de opções em "audio"
-                }
-                return;
-            }
-            if (e.code === jumpKey) {
-                action();
+            if (e.code === "ArrowUp") moveUp();
+            if (e.code === "ArrowDown") moveDown();
+            if (e.code === "Enter") action(); // Seleciona a opção ao pressionar Enter
+            if (gameState === "menu" && e.code === jumpKey) {
+                action(); // Executa a ação se for a tecla de pulo
             }
         });
         /* Eventos dos Botões */
-        document.getElementById("btnUp").onclick = function () {
-            if (gameState === "menu") {
-                if (menuPage === "main") {
-                    menuOption--; // Move a seleção para cima
-                    if (menuOption < 0) menuOption = 2; // Ajuste o número de opções
-                }
-                playMenuMusic(); // Inicia a música do menu ao mover
-            }
-        };
-        document.getElementById("btnDown").onclick = function () {
-            if (gameState === "menu") {
-                if (menuPage === "main") {
-                    menuOption++; // Move a seleção para baixo
-                    if (menuOption > 2) menuOption = 0; // Ajuste o número de opções
-                }
-                playMenuMusic(); // Inicia a música do menu ao mover
-            }
-        };
+        document.getElementById("btnUp").onclick = moveUp;
+        document.getElementById("btnDown").onclick = moveDown;
         /* MOUSE e TOQUE */
         canvas.addEventListener("mousedown", function () {
             action(); // Chama a ação geral ao clicar no canvas
@@ -259,7 +240,7 @@
             plane.velocity = 0;
             towerX = canvas.width;
             gapY = Math.random() * (canvas.height - gapSize - 200); // Reserve um espaço extra
-            score = 0;
+            score = 0; 
             passed = false;
             gameOver = false;
         }
@@ -299,25 +280,6 @@
                 passed = true;
             }
             checkCollision();
-            if (plane.velocity < 0) {
-                frameTimer += delta;
-                if (frameTimer >= frameSpeed) {
-                    frameTimer = 0;
-                    currentFrame++;
-                    if (currentFrame >= frames.length) {
-                        currentFrame = 0;
-                    }
-                }
-            }
-            // Atualiza as nuvens
-            for (let cloud of cloudList) {
-                cloud.x -= cloud.speed * delta;
-                if (cloud.x < -150) {
-                    cloud.x = canvas.width + Math.random() * 200;
-                    cloud.y = Math.random() * 300;
-                    cloud.frame = Math.floor(Math.random() * clouds.length);
-                }
-            }
         }
         /* DESENHO */
         function draw() {
@@ -356,24 +318,9 @@
                 ctx.font = "30px Arial";
                 ctx.fillText("Cat Sky Game", 100, 150);
                 ctx.font = "20px Arial";
-                // Opções do menu
-                if (menuPage === "main") {
-                    ctx.fillText((menuOption === 0 ? "> " : "") + "Start Game", 130, 250);
-                    ctx.fillText((menuOption === 1 ? "> " : "") + "Controls", 130, 300);
-                    ctx.fillText((menuOption === 2 ? "> " : "") + "Audio", 130, 350);
-                }
-                if (menuPage === "controls") {
-                    ctx.fillText((menuOption === 0 ? "> " : "") + "Change Jump Key", 100, 260);
-                    ctx.fillText((menuOption === 1 ? "> " : "") + "Back", 130, 320);
-                    if (waitingKey) {
-                        ctx.fillText("Press a key...", 120, 380);
-                    }
-                }
-                if (menuPage === "audio") {
-                    ctx.fillText((menuOption === 0 ? "> " : "") + "Music Volume: " + Math.round(musicVolume * 100), 90, 260);
-                    ctx.fillText((menuOption === 1 ? "> " : "") + "SFX Volume: " + Math.round(sfxVolume * 100), 100, 320);
-                    ctx.fillText((menuOption === 2 ? "> " : "") + "Back", 140, 380);
-                }
+                ctx.fillText((menuOption === 0 ? "> " : "") + "Start Game", 130, 250);
+                ctx.fillText((menuOption === 1 ? "> " : "") + "Controls", 130, 300);
+                ctx.fillText((menuOption === 2 ? "> " : "") + "Audio", 130, 350);
             }
             ctx.fillStyle = "black";
             ctx.font = "16px Arial";
@@ -392,6 +339,7 @@
             draw();
             requestAnimationFrame(loop);
         }
+        // Começa o loop do jogo
         requestAnimationFrame(loop);
     </script>
 </body>
