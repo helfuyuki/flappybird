@@ -54,7 +54,6 @@ border-radius:8px;
 </div>
 
 <audio id="backgroundMusic" src="playlist.mp3" loop></audio>
-<audio id="jumpSound" src="jump.mp3"></audio>
 
 <script>
 
@@ -121,8 +120,26 @@ let sfxVolume=0.2;
 const backgroundMusic=document.getElementById("backgroundMusic");
 backgroundMusic.volume=musicVolume;
 
-const jumpSound=document.getElementById("jumpSound");
-jumpSound.volume=sfxVolume;
+/* POOL DE SOM DO PULO */
+
+const jumpSounds=[];
+for(let i=0;i<5;i++){
+let s=new Audio("jump.mp3");
+s.volume=sfxVolume;
+jumpSounds.push(s);
+}
+
+let jumpIndex=0;
+
+function playJump(){
+let s=jumpSounds[jumpIndex];
+s.currentTime=0;
+s.play().catch(()=>{});
+jumpIndex++;
+if(jumpIndex>=jumpSounds.length){
+jumpIndex=0;
+}
+}
 
 const frames=[];
 for(let i=1;i<=5;i++){
@@ -151,8 +168,7 @@ return;
 }
 
 plane.velocity=jump;
-jumpSound.currentTime=0;
-jumpSound.play().catch(()=>{});
+playJump();
 
 }
 
@@ -163,7 +179,7 @@ if(menuPage==="main"){
 if(menuOption===0){
 gameState="game";
 resetGame();
-backgroundMusic.play();
+backgroundMusic.play().catch(()=>{});
 }
 
 if(menuOption===1){
@@ -241,7 +257,11 @@ backgroundMusic.volume=musicVolume;
 if(menuOption===1){
 sfxVolume-=0.1;
 if(sfxVolume<0)sfxVolume=0;
-jumpSound.volume=sfxVolume;
+
+for(let s of jumpSounds){
+s.volume=sfxVolume;
+}
+
 }
 
 }
@@ -261,7 +281,11 @@ backgroundMusic.volume=musicVolume;
 if(menuOption===1){
 sfxVolume+=0.1;
 if(sfxVolume>1)sfxVolume=1;
-jumpSound.volume=sfxVolume;
+
+for(let s of jumpSounds){
+s.volume=sfxVolume;
+}
+
 }
 
 }
@@ -423,22 +447,17 @@ ctx.drawImage(frames[currentFrame],plane.x,plane.y,plane.width,plane.height);
 }
 
 if(gameState==="game"){
-
 ctx.fillStyle="black";
 ctx.font="24px Arial";
 ctx.fillText("Score: "+score,10,30);
-
 }
 
 if(gameOver){
-
 ctx.fillStyle="black";
 ctx.font="40px Arial";
 ctx.fillText("Game Over",110,300);
-
 ctx.font="20px Arial";
 ctx.fillText("Press Jump to Restart",90,340);
-
 }
 
 if(gameState==="menu"){
@@ -450,30 +469,24 @@ ctx.fillText("Cat Sky Game",100,150);
 ctx.font="20px Arial";
 
 if(menuPage==="main"){
-
 ctx.fillText((menuOption===0?"> ":"")+"Start Game",130,250);
 ctx.fillText((menuOption===1?"> ":"")+"Controls",130,300);
 ctx.fillText((menuOption===2?"> ":"")+"Audio",130,350);
-
 }
 
 if(menuPage==="controls"){
-
 ctx.fillText((menuOption===0?"> ":"")+"Change Jump Key",100,260);
 ctx.fillText((menuOption===1?"> ":"")+"Back",130,320);
 
 if(waitingKey){
 ctx.fillText("Press a key...",120,380);
 }
-
 }
 
 if(menuPage==="audio"){
-
 ctx.fillText((menuOption===0?"> ":"")+"Music Volume: "+Math.round(musicVolume*100),90,260);
 ctx.fillText((menuOption===1?"> ":"")+"SFX Volume: "+Math.round(sfxVolume*100),100,320);
 ctx.fillText((menuOption===2?"> ":"")+"Back",140,380);
-
 }
 
 }
