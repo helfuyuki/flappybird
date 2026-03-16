@@ -74,12 +74,12 @@ const ctx=canvas.getContext("2d");
 
 ctx.imageSmoothingEnabled=false;
 
-/* BACKGROUND */
+/BACKGROUND/
 
 const sky=new Image();
 sky.src="sky.png";
 
-/* CANOS */
+/CANOS/
 
 const pipeBottom=new Image();
 pipeBottom.src="cano1.png";
@@ -87,7 +87,7 @@ pipeBottom.src="cano1.png";
 const pipeTop=new Image();
 pipeTop.src="cano2.png";
 
-/* NUVENS */
+/NUVENS/
 
 const clouds=[];
 
@@ -109,7 +109,7 @@ frame:Math.floor(Math.random()*clouds.length)
 });
 
 }
-/* PERSONAGEM */
+/GARFIELD/
 
 let plane={
 x:80,
@@ -122,7 +122,7 @@ velocity:0
 let gravity=0.25;
 let jump=-6;
 
-/* CANOS */
+/CANOS/
 
 let towerX=canvas.width;
 
@@ -132,12 +132,12 @@ let gapY=Math.random()*(canvas.height-gapSize-200);
 
 let speed=2;
 
-/* SCORE */
+/SCORE/
 
 let score=0;
 let passed=false;
 
-/* ESTADO */
+/ESTADO/
 
 let gameState="menu";
 let gameOver=false;
@@ -147,17 +147,17 @@ let menuPage="main";
 
 let paused=false;
 
-/* NOVO SISTEMA DE TECLA DE PULO */
+/NOVO SISTEMA DE TECLA DE PULO/
 
 let jumpKey="Space";
 let waitingForKey=false;
 
-/* VOLUME */
+/VOLUME/
 
 let musicVolume=0.4;
 let sfxVolume=0.2;
 
-/* PERSONAGEM */
+/GARFIELD/
 
 const frames=[];
 
@@ -170,13 +170,13 @@ frames.push(img);
 const fallImage=new Image();
 fallImage.src="caindo.png";
 
-/* ANIMAÇÃO */
+/FRAMES/
 
 let frameIndex=0;
 let frameTimer=0;
 let frameSpeed=6;
 
-/* AUDIO */
+/AUDIO/
 
 const backgroundMusic=document.getElementById("backgroundMusic");
 backgroundMusic.volume=musicVolume;
@@ -184,7 +184,7 @@ backgroundMusic.volume=musicVolume;
 const menuMusic=document.getElementById("menuMusic");
 menuMusic.volume=0.5;
 
-/* SOM DO PULO */
+/SOM DO PULO/
 
 const jumpSounds=[];
 for(let i=0;i<4;i++){
@@ -221,7 +221,7 @@ jumpIndex=0;
 
 }
 
-/* MENU MUSIC */
+/MENU MUSIC/
 
 function playMenuMusic(){
 menuMusic.play().catch(()=>{});
@@ -232,7 +232,7 @@ menuMusic.pause();
 menuMusic.currentTime=0;
 }
 
-/* MENU ACTION */
+/MENU ACTION/
 
 function action(){
 
@@ -305,7 +305,7 @@ playJump();
 
 }
 
-/* VOLUME */
+/VOLUME/
 
 function adjustMusicVolume(amount){
 
@@ -331,7 +331,7 @@ s.volume=sfxVolume;
 
 }
 
-/* MENU NAV */
+/MENU NAV/
 
 function moveUp(){
 
@@ -361,7 +361,7 @@ if(menuPage==="audio" && menuOption>2)menuOption=0;
 
 }
 
-/* TECLADO */
+/TECLADO/
 
 document.addEventListener("keydown",function(e){
 
@@ -406,7 +406,7 @@ action();
 
 });
 
-/* BOTÕES MOBILE */
+/BOTÕES MOBILE/
 
 document.getElementById("btnUp").onclick=moveUp;
 document.getElementById("btnDown").onclick=moveDown;
@@ -434,7 +434,7 @@ if(menuOption===1)adjustSFXVolume(0.05);
 
 };
 
-/* TOUCH */
+/TOUCH/
 
 canvas.addEventListener("touchstart",function(e){
 
@@ -445,7 +445,7 @@ action();
 
 },{passive:false});
 
-/* RESET */
+/RESET/
 
 function resetGame(){
 
@@ -462,7 +462,7 @@ gameOver=false;
 
 }
 
-/* COLISÃO */
+/COLISÃO/
 
 function checkCollision(){
 
@@ -483,7 +483,7 @@ gameOver=true;
 
 }
 
-/* UPDATE */
+/UPDATE/
 
 function update(delta){
 
@@ -491,7 +491,7 @@ if(gameState!=="game")return;
 if(paused)return;
 if(gameOver)return;
   
-/* ANIMAÇÃO DAS NUVENS */
+/ANIMAÇÃO DAS NUVENS/
 
 for(let cloud of cloudList){
 
@@ -535,7 +535,7 @@ checkCollision();
 
 }
 
-/* DRAW */
+/DRAW/
 
 function draw(){
 
@@ -646,7 +646,7 @@ ctx.fillText("Paused",130,300);
 
 }
 
-/* LOOP */
+/LOOP/
 
 let lastTime=0;
 
